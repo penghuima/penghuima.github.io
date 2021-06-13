@@ -98,8 +98,8 @@ class SomeClass:
 
 ###脚注
 生成一个脚注[^footnote].
-  [^footnote]: 这里是 **脚注** 的 *内容*.
-  
+[^footnote]: 这里是 **脚注** 的 *内容*.
+
 ### 目录
 用 `[TOC]`来生成目录：
 
