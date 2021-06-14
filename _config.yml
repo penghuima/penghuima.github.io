@@ -26,8 +26,8 @@ linkedIn_username: open-function-110407214
 dribbble_username:
 
 keywords: 留记录,个人博客,等待时候,java技术,SSM,Linux,Spring MVC,Spring,Mybatis,html,css,javascript,jquery,集群,负载均衡
-description: 留记录,专门留下自己技术博文以及生活中的点点滴滴.
-description_footer: 记录学习中的点点滴滴！
+description: 留下自己博文中的点点滴滴.    #这个貌似是在评论区域留下的   在issues里会出现
+description_footer: 记录学习中的点点滴滴！     #网页尾部会出现
 
 
 # comments
