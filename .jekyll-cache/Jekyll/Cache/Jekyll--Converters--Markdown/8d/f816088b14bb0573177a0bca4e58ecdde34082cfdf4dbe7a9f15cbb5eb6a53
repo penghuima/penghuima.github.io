@@ -1,0 +1,17 @@
+I"9<ul id="markdown-toc">
+  <li><a href="#freemarker-ide-插件" id="markdown-toc-freemarker-ide-插件">freemarker-ide 插件</a></li>
+  <li><a href="#下载插件" id="markdown-toc-下载插件">下载插件</a></li>
+</ul>
+
+<h3 id="freemarker-ide-插件">freemarker-ide 插件</h3>
+
+<blockquote>
+  <p>MyEclipce 安装FreeMarker插件这绝对是最简单的了，比安装Velocity插件还简单。</p>
+
+  <p><a href="http://blog.csdn.net/janda2011/article/details/43051469">Velocity插件安装教程</a></p>
+</blockquote>
+
+<h3 id="下载插件">下载插件</h3>
+<p>到<a href="https://sourceforge.net/projects/freemarker-ide/files/">https://sourceforge.net/projects/freemarker-ide/files/</a> 下载插件、可自行下载对应的版本，我下载的是目前最新的版本：<strong>freemarker-ide-0.9.14</strong></p>
+
+:ET

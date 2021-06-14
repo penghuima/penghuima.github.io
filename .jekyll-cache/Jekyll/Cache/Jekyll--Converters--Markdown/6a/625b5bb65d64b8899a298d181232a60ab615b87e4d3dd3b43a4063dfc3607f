@@ -1,0 +1,85 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#什么是gitblit" id="markdown-toc-什么是gitblit">什么是gitblit</a></li>
+  <li><a href="#获取gitblit" id="markdown-toc-获取gitblit">获取gitblit</a></li>
+  <li><a href="#安装过程" id="markdown-toc-安装过程">安装过程</a></li>
+  <li><a href="#修改配置" id="markdown-toc-修改配置">修改配置</a></li>
+  <li><a href="#启动gitblit" id="markdown-toc-启动gitblit">启动gitblit</a></li>
+</ul>
+
+<h2 id="什么是gitblit">什么是gitblit</h2>
+<p>Gitblit是一个用于管理，查看和提供Git存储库的开源纯Java堆栈。 它主要设计为希望托管集中式存储库的小型工作组的工具。</p>
+<blockquote>
+  <p>作用：把它当作是Github网站使用.</p>
+</blockquote>
+
+<h2 id="获取gitblit">获取gitblit</h2>
+<p>官网：<a href="http://gitblit.com">http://gitblit.com</a></p>
+<ul>
+  <li>通过官网下载安装包</li>
+  <li>在线安装、通过 <code class="language-plaintext highlighter-rouge">wget</code> 方法</li>
+</ul>
+
+<p>目前最新版本：
+Current Release 1.8.0 (2016-06-22)
+下载地址：<a href="http://dl.bintray.com/gitblit/releases/gitblit-1.8.0.tar.gz">http://dl.bintray.com/gitblit/releases/gitblit-1.8.0.tar.gz</a></p>
+
+<!--more-->
+
+<h2 id="安装过程">安装过程</h2>
+<blockquote>
+  <p>由于 gitblit 是基于java运行，所以必须要有java环境，如何安装java、请参考：
+<a href="http://liujilu.com/2017/04/25/Ubuntu-Install-JDK/">http://liujilu.com/2017/04/25/Ubuntu-Install-JDK/</a></p>
+</blockquote>
+
+<p>本次使用 <code class="language-plaintext highlighter-rouge">wget</code> 方式安装、命令如下：</p>
+<blockquote>
+  <p>wget http://dl.bintray.com/gitblit/releases/gitblit-1.8.0.tar.gz</p>
+</blockquote>
+
+<p>解压<code class="language-plaintext highlighter-rouge">gitblit-1.8.0.tar.gz</code> 进入其目录</p>
+<blockquote>
+  <p>tar -zxvf gitblit-1.8.0.tar.gz</p>
+</blockquote>
+
+<p>安装目录最好是消除空格和中文。</p>
+
+<h2 id="修改配置">修改配置</h2>
+<p>修改 <code class="language-plaintext highlighter-rouge">gitblit-1.8.0/data/defaults.properties</code> 文件
+常用参数说明：</p>
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">git.sshPort</code> :ssh更新代码端口，默认为：<code class="language-plaintext highlighter-rouge">29418</code><br />
+<code class="language-plaintext highlighter-rouge">server.httpPort</code> :http端口、供网页访问仓库,默认为：<code class="language-plaintext highlighter-rouge">0</code><br />
+<code class="language-plaintext highlighter-rouge">server.httpsPort</code>:https端口、供网页访问仓库,默认为：<code class="language-plaintext highlighter-rouge">8443</code><br />
+<code class="language-plaintext highlighter-rouge">git.packedGitLimit</code>:设置大于最大存储库的大小,默认为：<code class="language-plaintext highlighter-rouge">10m</code></p>
+</blockquote>
+
+<h2 id="启动gitblit">启动gitblit</h2>
+<ul>
+  <li>通过java命令启动gitblit：
+    <blockquote>
+      <p>java -jar gitblit.jar –baseFolder data</p>
+    </blockquote>
+  </li>
+  <li>直接启动gitblit.sh 执行文件
+    <blockquote>
+      <p>sh gitblit.sh</p>
+    </blockquote>
+  </li>
+</ul>
+
+<p>如果出现如图所示、那就是代表启动成功：
+<img src="/images/2017-04-25/01.jpg" alt="" /></p>
+
+<p>通过网页访问：</p>
+
+<p>我这设置<code class="language-plaintext highlighter-rouge">server.httpPort</code>为：<code class="language-plaintext highlighter-rouge">8446</code>, 那么网页访问地址为：<a href="http://ip:8446">http://ip:8446</a><br />
+进入首页、默认帐号密码：<code class="language-plaintext highlighter-rouge">admin\admin</code></p>
+<blockquote>
+  <p>注意：确保更改管理员用户名/密码！</p>
+</blockquote>
+
+<p><img src="/images/2017-04-25/02.jpg" alt="" /></p>
+
+<p>至此、就完成了gitblit.sh 操作！
+完全可以把这个当作github使用！</p>
+:ET

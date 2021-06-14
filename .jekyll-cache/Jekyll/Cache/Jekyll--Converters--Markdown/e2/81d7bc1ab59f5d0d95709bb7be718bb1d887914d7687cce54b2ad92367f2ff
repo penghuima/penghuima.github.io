@@ -1,0 +1,149 @@
+I"�D<ul id="markdown-toc">
+  <li><a href="#一io流介绍" id="markdown-toc-一io流介绍">一、IO流介绍</a></li>
+  <li><a href="#二inputstream-文件读取" id="markdown-toc-二inputstream-文件读取">二、InputStream 文件读取</a></li>
+  <li><a href="#三outputstream文件输出" id="markdown-toc-三outputstream文件输出">三、OutPutStream文件输出</a></li>
+  <li><a href="#四文件复制" id="markdown-toc-四文件复制">四、文件复制</a></li>
+</ul>
+
+<h3 id="一io流介绍">一、IO流介绍</h3>
+<p>字节流：
+​	输入流：InputStream
+​	方法：	
+​		read(byte[] b) 
+​		从输入流中读取一定数量的字节，并将其存储在缓冲区数组 b 中。</p>
+
+<p>​	输出流：OutPutStream
+​		write(byte[] b, int off, int len) 
+​		将指定 byte 数组中从偏移量 off 开始的 len 个字节写入此输出流。
+字符流：
+​	输入流：Reader
+​	输出流：Writer</p>
+
+<h3 id="二inputstream-文件读取">二、InputStream 文件读取</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">inputStreamMethod</span><span class="o">(){</span>
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"F:\\z暂存文件\\test.txt"</span><span class="o">);</span>
+		<span class="nc">InputStream</span> <span class="n">inputStream</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">inputStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="kt">byte</span><span class="o">[]</span> <span class="n">car</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">10</span><span class="o">];</span>
+			<span class="c1">//接收实际读取大小</span>
+			<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+			<span class="k">while</span> <span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">inputStream</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">car</span><span class="o">))!=-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">//输出、字节数组转成字符串</span>
+				<span class="nc">String</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">car</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="n">len</span><span class="o">);</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">info</span><span class="o">);</span>
+			<span class="o">}</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"文件不存在"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"文件读取失败"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">inputStream</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">inputStream</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+					<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"流关闭失败"</span><span class="o">);</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<!--more-->
+
+<h3 id="三outputstream文件输出">三、OutPutStream文件输出</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">outputStreamMethod</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"F:\\z暂存文件\\test.txt"</span><span class="o">);</span>
+		<span class="nc">OutputStream</span> <span class="n">os</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="c1">//追加形式、否则默认是覆盖</span>
+			<span class="n">os</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">f</span><span class="o">,</span><span class="kc">true</span><span class="o">);</span>
+			<span class="c1">//操作</span>
+			<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="s">"\r\n这是即将要输出去的字符串1"</span><span class="o">;</span>
+			<span class="c1">//字符串转字节数组</span>
+			<span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">));</span>
+			<span class="c1">//强制刷新</span>
+			<span class="n">os</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"文件找不到"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnsupportedEncodingException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"文件写出失败"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">os</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">os</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="四文件复制">四、文件复制</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">fileCopy</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">SimpleDateFormat</span> <span class="n">df</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleDateFormat</span><span class="o">(</span><span class="s">"yyyy-MM-dd HH:mm:ss:sss"</span><span class="o">);</span>
+		<span class="nc">Date</span> <span class="n">start</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"start time:"</span><span class="o">+</span><span class="n">df</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="n">start</span><span class="o">));</span>
+		<span class="c1">//源头文件 F:\\z暂存文件\\test.txt</span>
+		<span class="nc">File</span> <span class="n">inFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"D:\\DevelopmentTools\\VM\\os\\CentOS-7-x86_64-DVD-1611.iso"</span><span class="o">);</span>
+		<span class="c1">//目的地文件</span>
+		<span class="nc">File</span> <span class="n">outFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"F:\\z暂存文件\\CentOS-7-x86_64-Minimal-1511.iso"</span><span class="o">);</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">outFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">outFile</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">InputStream</span> <span class="n">inStream</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">OutputStream</span> <span class="n">oStream</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">inStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">inFile</span><span class="o">);</span>
+			<span class="n">oStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">outFile</span><span class="o">);</span>
+			<span class="kt">byte</span><span class="o">[]</span> <span class="n">by</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span>
+			<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+			<span class="k">while</span> <span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">inStream</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">by</span><span class="o">))!=-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">//String s = new String(by);</span>
+				<span class="c1">//System.out.println(s);</span>
+				<span class="n">oStream</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">by</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">);</span>
+			<span class="o">}</span>
+			<span class="n">oStream</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"上传文件找不到"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"文件处理异常"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">oStream</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">oStream</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">inStream</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">inStream</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="nc">Date</span> <span class="n">end</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"end time:"</span><span class="o">+</span><span class="n">df</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="n">end</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"total time:"</span><span class="o">+(</span><span class="n">end</span><span class="o">.</span><span class="na">getTime</span><span class="o">()-</span><span class="n">start</span><span class="o">.</span><span class="na">getTime</span><span class="o">()));</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<hr />
+<p>平行世界，多元生活，愿你我既可以朝九晚五，又能够浪迹天涯。</p>
+
+<p>– 《好吗好的》</p>
+:ET

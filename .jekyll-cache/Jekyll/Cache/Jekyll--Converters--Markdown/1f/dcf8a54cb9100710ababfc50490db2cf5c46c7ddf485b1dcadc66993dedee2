@@ -1,0 +1,19 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+  <li><a href="#命令格式" id="markdown-toc-命令格式">命令格式</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a></li>
+</ul>
+
+<h3 id="说明">说明</h3>
+<p>linux 的 scp 命令 可以 在 linux 之间复制/下载 文件 和 目录；</p>
+
+<h3 id="命令格式">命令格式</h3>
+<p>命令基本格式： 
+<code class="language-plaintext highlighter-rouge">scp [可选参数] file_source file_target </code></p>
+
+<h3 id="案例">案例</h3>
+<p>两台服务器：
+<code class="language-plaintext highlighter-rouge">192.168.0.3</code> &gt;  当前登录的服务器
+<code class="language-plaintext highlighter-rouge">192.168.0.4</code></p>
+
+:ET
