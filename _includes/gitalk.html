@@ -10,7 +10,7 @@ var gitalk = new Gitalk({
   admin: ['penghuima'],
   language :'zh-CN',
   //id: location.pathname,//(location.pathname).split("/").pop().substring(0, 49),      // Ensure uniqueness and length less than 50  这样处理貌似还是会出错...
-  id: '{{ location.pathname | truncate: 50, '' }}',
+  id: {{ location.pathname | truncate: 50, '' }},  //这里面就单指location.pathname字符串了
   distractionFreeMode: true  // 貌似可以阻挡在每个博客评论区看到别的博客评论区的内容
  // createIssueManually: true
 })
