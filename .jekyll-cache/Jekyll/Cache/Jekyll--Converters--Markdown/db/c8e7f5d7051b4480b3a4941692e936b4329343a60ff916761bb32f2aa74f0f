@@ -1,0 +1,7 @@
+I"R<ul id="markdown-toc">
+  <li><a href="#jdk-是什么" id="markdown-toc-jdk-是什么">JDK 是什么</a></li>
+</ul>
+
+<h2 id="jdk-是什么">JDK 是什么</h2>
+<p>JDK 是Java开发工具包 (Java Development Kit ) 的缩写。它是一种用于构建在 Java 平台上发布的应用程序、applet 和组件的开发环境。其中包括了Java编译器、JVM、大量的Java工具以及Java基础API里面是Java类库和Java的语言规范，同时Java语言的任何改进都应当加到其中，作为后续版本发布。要成为一名JAVA程序员，JDK是一种最基本的工具。</p>
+:ET

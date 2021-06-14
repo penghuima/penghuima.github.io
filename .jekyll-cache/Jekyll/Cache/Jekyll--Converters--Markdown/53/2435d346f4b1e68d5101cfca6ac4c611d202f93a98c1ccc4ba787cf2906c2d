@@ -1,0 +1,49 @@
+I"g
+<ul id="markdown-toc">
+  <li><a href="#freemarker-ide-插件" id="markdown-toc-freemarker-ide-插件">freemarker-ide 插件</a></li>
+  <li><a href="#下载插件" id="markdown-toc-下载插件">下载插件</a></li>
+  <li><a href="#解压安装" id="markdown-toc-解压安装">解压安装</a></li>
+  <li><a href="#安装成功" id="markdown-toc-安装成功">安装成功</a></li>
+  <li><a href="#设置默认打开" id="markdown-toc-设置默认打开">设置默认打开</a></li>
+  <li><a href="#自动高亮" id="markdown-toc-自动高亮">自动高亮</a></li>
+</ul>
+
+<h3 id="freemarker-ide-插件">freemarker-ide 插件</h3>
+
+<blockquote>
+  <p>MyEclipce 安装FreeMarker插件这绝对是最简单的了，比安装Velocity插件还简单。</p>
+
+  <p><a href="http://blog.csdn.net/janda2011/article/details/43051469">Velocity插件安装教程</a></p>
+</blockquote>
+
+<h3 id="下载插件">下载插件</h3>
+<p>到<a href="https://sourceforge.net/projects/freemarker-ide/files/">https://sourceforge.net/projects/freemarker-ide/files/</a> 下载插件、可自行下载对应的版本，我下载的是目前最新的版本：<strong>freemarker-ide-0.9.14</strong></p>
+
+<!--more-->
+
+<h3 id="解压安装">解压安装</h3>
+<p>将下载下来的<a href="https://sourceforge.net/projects/freemarker-ide/files/freemarker-ide/0.9.14/freemarker-ide-0.9.14.zip">freemarker-ide-0.9.14.zip</a> 解压，解压出的文件夹放入到MyEclipse安装目录dropins 下
+<code class="language-plaintext highlighter-rouge">dropins根据自己安装Myeclipse的路径选择 </code>，例：
+<img src="/images/2016-11-03/01.jpg" alt="插件安装目录" /></p>
+
+<h3 id="安装成功">安装成功</h3>
+<p>重启Myeclipse，会自动提示成功安装该插件，如图：
+<img src="/images/2016-11-03/02.jpg" alt="安装成功提示" /></p>
+
+<p>如果安装成功,则在 window –&gt; Preferences 左边的树形栏里出现FreeMarker Editor一项新的内容</p>
+
+<h3 id="设置默认打开">设置默认打开</h3>
+<p>设置工具中<code class="language-plaintext highlighter-rouge">*.ftl</code>文件都是用Freemarker Editor 打开：
+<img src="/images/2016-11-03/03.jpg" alt="ftl默认打开格式" /></p>
+
+<h3 id="自动高亮">自动高亮</h3>
+
+<blockquote>
+  <p>如果以上步骤顺利，打开<code class="language-plaintext highlighter-rouge">.ftl</code>文件，代码会自动高亮，还有自动提示功能！
+<code class="language-plaintext highlighter-rouge">.ftl</code>文件的icon也会改变</p>
+</blockquote>
+
+<p><img src="/images/2016-11-03/04.jpg" alt="代码高亮" /></p>
+
+<p>博客：<a href="http://liujilu.com/">http://liujilu.com/</a></p>
+:ET
