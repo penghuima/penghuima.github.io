@@ -3,25 +3,25 @@
 欢迎大家！
 
 - [博客主题预览](#博客主题预览)
-- [项目目录](项目目录)
-  - [主页](主页)
-  - [项目目录结构](项目目录结构)
+- [项目目录](#项目目录)
+  - [主页](#主页)
+  - [项目目录结构](#项目目录结构)
 
-* [Fork修改指南](Fork修改指南)
-  * [修改全局配置文件 _config.yml](修改全局配置文件 _config.yml)
-  * [如何发布一篇博客](如何发布一篇博客)
-  * [修改网站 ico 图标](修改网站 ico 图标)
+* [Fork修改指南](#Fork修改指南)
+  * [修改全局配置文件 _config.yml](#修改全局配置文件 _config.yml)
+  * [如何发布一篇博客](#如何发布一篇博客)
+  * [修改网站 ico 图标](#修改网站 ico 图标)
   * [修改评论模块](#修改评论模块)
 
 ## 博客主题预览
 
 博客网站的主要展示界面如下，分为主页、归档、分类、标签、收藏、关于、搜索等几个模块，大家可以进入我的 [个人博客](https://penghuima.github.io/) 点击了解
 
-<img align="left" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615151017868.png" width="75%">
+<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615151017868.png" width="75%">
 
 博客网站页尾界面如下，主要是一些网站浏览统计量显示，和主题作者信息
 
-<img align="left" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615154745099.png" width="75%">
+<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615154745099.png" width="75%">
 
 > 浩阳大神牛逼,也有其它很多好的 Jekyll 主题模板，但我比较倾向于这一款的布局设计
 
@@ -49,7 +49,7 @@
 
  **网页浏览量统计模块**，换成自己的 id  ，网上教程很多，这里随便给大家分享一个  [访问统计](https://blog.csdn.net/weixin_33782386/article/details/94516630)
 
-<img align="left" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615220234426.png" width="72%">
+<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615220234426.png" width="72%">
 
 ### 如何发布一篇博客
 
@@ -57,7 +57,7 @@
 
 - 在撰写 markdown 格式博文时，先在文档开头以 yaml 格式下备注好 布局模板、博文标题、博文分类、博文标题，多说一句，博客主页上显示的**分类**板块和**标签**板块的数据都是通过这种博文开头定义输入的数据。
 
-<img align="left" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615222548774.png" width="72%">
+<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615222548774.png" width="72%">
 
 - 将博文目录调出来，这里的目录对应浏览博文时右边框显示的目录内容(浏览博客全部内容时，自己体会)，下面两行代码就可以调出目录
 
