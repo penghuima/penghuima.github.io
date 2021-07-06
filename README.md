@@ -33,7 +33,7 @@
 
 ### 项目目录结构
 
-主要项目文件夹及其作用描述，全部介绍可查看 [Jekyll](https://www.jekyll.com.cn/docs/structure/){:target="_blank"}官方目录结构
+主要项目文件夹及其作用描述，全部介绍可查看 [Jekyll](https://www.jekyll.com.cn/docs/structure/) 官方目录结构
 
 - _posts： 存放我们原始博文内容的地方
 - _includes： 你可以加载文件夹里的 html 内容到你的布局或者文章中以方便重用
