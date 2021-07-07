@@ -49,7 +49,13 @@
 
  **网页浏览量统计模块**，换成自己的 id  ，网上教程很多，这里随便给大家分享一个  [访问统计](https://blog.csdn.net/weixin_33782386/article/details/94516630)
 
-<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615220234426.png" width="72%">
+```markdown
+# statistic analysis 统计代码
+# 百度统计 id，将统计代码替换为自己的百度统计id，即
+# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
+# xxxxx字符串
+baidu_tongji_id: e7727291d61a86c8ec37dee6a5024e88
+```
 
 ### 如何发布一篇博客
 
@@ -57,7 +63,14 @@
 
 - 在撰写 markdown 格式博文时，先在文档开头以 yaml 格式下备注好 布局模板、博文标题、博文分类、博文标题，多说一句，博客主页上显示的**分类**板块和**标签**板块的数据都是通过这种博文开头定义输入的数据。
 
-<img align="center" src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210615222548774.png" width="72%">
+```markdown
+---
+layout: post
+title: "Shell教程"
+categories: Linux
+tags: linux shell
+---
+```
 
 - 将博文目录调出来，这里的目录对应浏览博文时右边框显示的目录内容(浏览博客全部内容时，自己体会)，下面两行代码就可以调出目录
 
@@ -88,7 +101,7 @@ $ git push origin master
 
 至此你就可以发布一篇自己写的博客了，发布之后你会发现博客**主页显示**，以及**分类板块**、**标签板块**等都会增加你新加入的相关内容。
 
-**注意：**在将博客 push 到仓库之前，最好先在本地环境测试一下，避免重复修改提交
+**注意:** 在将博客 push 到仓库之前，最好先在本地环境测试一下，避免重复修改提交
 
 ```shell
 jekyll s

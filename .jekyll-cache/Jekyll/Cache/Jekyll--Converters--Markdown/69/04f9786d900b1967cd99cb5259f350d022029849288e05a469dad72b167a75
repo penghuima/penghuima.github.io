@@ -1,31 +1,20 @@
-I"[<p>layout: post
-title: “快速熟悉开源项目”
-categories: 开源项目
-tags: 开源</p>
-
-<ul id="markdown-toc">
-  <li><a href="#快速熟悉开源项目" id="markdown-toc-快速熟悉开源项目">快速熟悉开源项目</a>    <ul>
-      <li><a href="#step1-查阅文档" id="markdown-toc-step1-查阅文档">Step1: 查阅文档</a>        <ul>
-          <li><a href="#查阅文档与博客" id="markdown-toc-查阅文档与博客">查阅文档与博客</a></li>
-          <li><a href="#带着问题去阅读" id="markdown-toc-带着问题去阅读">带着问题去阅读</a></li>
-        </ul>
-      </li>
-      <li><a href="#step2-动手实践" id="markdown-toc-step2-动手实践">Step2: 动手实践</a>        <ul>
-          <li><a href="#搭建项目" id="markdown-toc-搭建项目">搭建项目</a></li>
-          <li><a href="#深层次改动" id="markdown-toc-深层次改动">深层次改动</a></li>
-        </ul>
-      </li>
-      <li><a href="#step3-阅读源码" id="markdown-toc-step3-阅读源码">Step3: 阅读源码</a>        <ul>
-          <li><a href="#跟着运行过程阅读" id="markdown-toc-跟着运行过程阅读">跟着运行过程阅读</a></li>
-          <li><a href="#分模块阅读" id="markdown-toc-分模块阅读">分模块阅读</a></li>
-        </ul>
-      </li>
+I"�<ul id="markdown-toc">
+  <li><a href="#step1-查阅文档" id="markdown-toc-step1-查阅文档">Step1: 查阅文档</a>    <ul>
+      <li><a href="#查阅文档与博客" id="markdown-toc-查阅文档与博客">查阅文档与博客</a></li>
+      <li><a href="#带着问题去阅读" id="markdown-toc-带着问题去阅读">带着问题去阅读</a></li>
+    </ul>
+  </li>
+  <li><a href="#step2-动手实践" id="markdown-toc-step2-动手实践">Step2: 动手实践</a>    <ul>
+      <li><a href="#搭建项目" id="markdown-toc-搭建项目">搭建项目</a></li>
+      <li><a href="#深层次改动" id="markdown-toc-深层次改动">深层次改动</a></li>
+    </ul>
+  </li>
+  <li><a href="#step3-阅读源码" id="markdown-toc-step3-阅读源码">Step3: 阅读源码</a>    <ul>
+      <li><a href="#跟着运行过程阅读" id="markdown-toc-跟着运行过程阅读">跟着运行过程阅读</a></li>
+      <li><a href="#分模块阅读" id="markdown-toc-分模块阅读">分模块阅读</a></li>
     </ul>
   </li>
 </ul>
-
-<h2 id="快速熟悉开源项目">快速熟悉开源项目</h2>
-
 <p>如今的互联网越来越发达，各类开源项目如雨后春笋般不断涌现。开源社区和 GitHub 等知名开源代码托管平台，让我们免去了重新造轮子的痛苦，给了我们很多借鉴和学习的机会。在互相协作的过程中，开源项目不断涌现出生机与活力。</p>
 
 <p>快速熟悉一个开源项目一般分为查阅文档、动手实践以及源码阅读三个步骤。</p>
@@ -46,13 +35,13 @@ tags: 开源</p>
 
 <p>阅读文档的过程不能盲目，需要带着如下问题去阅读。</p>
 
-<ul class="task-list">
-  <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />这个项目解决了什么问题</p>
+<ul>
+  <li>
+    <p>这个项目解决了什么问题</p>
   </li>
-  <li class="task-list-item">这个项目涉及了哪些成熟的技术</li>
-  <li class="task-list-item">这个项目是否符合我的要求（用户规模、使用场景、性能、安全性等等）？</li>
-  <li class="task-list-item">当阅读完文档后，是否能尝试画出大致的架构图？</li>
+  <li>这个项目涉及了哪些成熟的技术</li>
+  <li>这个项目是否符合我的要求（用户规模、使用场景、性能、安全性等等）？</li>
+  <li>当阅读完文档后，是否能尝试画出大致的架构图？</li>
 </ul>
 
 <h3 id="step2-动手实践">Step2: 动手实践</h3>
@@ -89,10 +78,10 @@ tags: 开源</p>
 
 <p>此时也可以带着如下几个问题帮助自己理解</p>
 
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />调用了什么底层库</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />采用了什么设计模式</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />这样写有什么好处？</li>
+<ul>
+  <li>调用了什么底层库</li>
+  <li>采用了什么设计模式</li>
+  <li>这样写有什么好处？</li>
 </ul>
 
 <p>如果在阅读源码的过程中出现瓶颈，你一时无法理解代码的用意，不妨去阅读一下相关的单元测试。一个好的但愿你测试通常都描述了要测试代码的主要功能和数据边界，通过运行和理解单元测试，可以有效地帮助理解源码。</p>
