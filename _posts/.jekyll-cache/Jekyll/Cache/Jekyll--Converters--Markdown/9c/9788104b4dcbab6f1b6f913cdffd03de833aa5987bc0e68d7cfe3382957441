@@ -1,0 +1,264 @@
+I"�Y<ul id="markdown-toc">
+  <li><a href="#目标" id="markdown-toc-目标">目标</a></li>
+  <li><a href="#1-安装镜像" id="markdown-toc-1-安装镜像">1. 安装镜像</a>    <ul>
+      <li><a href="#11-安装地址" id="markdown-toc-11-安装地址">1.1 安装地址</a></li>
+      <li><a href="#12-docker-拉取镜像" id="markdown-toc-12-docker-拉取镜像">1.2 Docker 拉取镜像</a></li>
+    </ul>
+  </li>
+  <li><a href="#2创建docker-网络" id="markdown-toc-2创建docker-网络">2.创建Docker 网络</a>    <ul>
+      <li><a href="#21-docker网段命令" id="markdown-toc-21-docker网段命令">2.1 Docker网段命令</a></li>
+      <li><a href="#22-创建网段" id="markdown-toc-22-创建网段">2.2 创建网段</a></li>
+      <li><a href="#23-查询网段信息" id="markdown-toc-23-查询网段信息">2.3 查询网段信息</a></li>
+    </ul>
+  </li>
+  <li><a href="#3-创建volume" id="markdown-toc-3-创建volume">3. 创建Volume</a>    <ul>
+      <li><a href="#31-docke-volume卷命令" id="markdown-toc-31-docke-volume卷命令">3.1 Docke Volume卷命令</a></li>
+      <li><a href="#32-创建卷" id="markdown-toc-32-创建卷">3.2 创建卷</a></li>
+      <li><a href="#33-查看卷" id="markdown-toc-33-查看卷">3.3 查看卷</a></li>
+    </ul>
+  </li>
+  <li><a href="#4-创建mysql-pxc容器" id="markdown-toc-4-创建mysql-pxc容器">4. 创建MySQL PXC容器</a>    <ul>
+      <li><a href="#41-创建master数据库" id="markdown-toc-41-创建master数据库">4.1 创建Master数据库</a></li>
+      <li><a href="#42-创建备库" id="markdown-toc-42-创建备库">4.2 创建备库</a>        <ul>
+          <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+          <li><a href="#注意事项" id="markdown-toc-注意事项">注意事项</a></li>
+        </ul>
+      </li>
+      <li><a href="#连接效果" id="markdown-toc-连接效果">连接效果</a></li>
+      <li><a href="#数据同步测试" id="markdown-toc-数据同步测试">数据同步测试</a></li>
+    </ul>
+  </li>
+  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+</ul>
+
+<h2 id="目标">目标</h2>
+<p>搭建一个5个数据库的集群、数据实时同步</p>
+
+<h2 id="1-安装镜像">1. 安装镜像</h2>
+
+<h3 id="11-安装地址">1.1 安装地址</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://hub.docker.com/r/percona/percona-xtradb-cluster
+</code></pre></div></div>
+
+<h3 id="12-docker-拉取镜像">1.2 Docker 拉取镜像</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@localhost ~]# docker pull percona/percona-xtradb-cluster
+</code></pre></div></div>
+
+<h2 id="2创建docker-网络">2.创建Docker 网络</h2>
+<h3 id="21-docker网段命令">2.1 Docker网段命令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#创建网段、取名为：net1
+[root@localhost ~]# docker network create net1
+#查看指定网段详细信息
+[root@localhost ~]# docker network inspect net1
+#删除指定网段
+[root@localhost ~]# docker network rm net1
+</code></pre></div></div>
+
+<h3 id="22-创建网段">2.2 创建网段</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@localhost ~]# docker network create --subnet=172.18.0.0/24 net1
+</code></pre></div></div>
+
+<!--more-->
+
+<h3 id="23-查询网段信息">2.3 查询网段信息</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">network</span> <span class="n">inspect</span> <span class="n">net1</span>
+<span class="o">[</span>
+    <span class="o">{</span>
+        <span class="s">"Name"</span><span class="o">:</span> <span class="s">"net1"</span><span class="o">,</span>
+        <span class="s">"Id"</span><span class="o">:</span> <span class="s">"0e197c8d61e37aad6e52188b2a185de7a723087fd88e57f36a2ac98443e2823a"</span><span class="o">,</span>
+        <span class="s">"Created"</span><span class="o">:</span> <span class="s">"2019-05-16T15:25:46.447740525+08:00"</span><span class="o">,</span>
+        <span class="s">"Scope"</span><span class="o">:</span> <span class="s">"local"</span><span class="o">,</span>
+        <span class="s">"Driver"</span><span class="o">:</span> <span class="s">"bridge"</span><span class="o">,</span>
+        <span class="s">"EnableIPv6"</span><span class="o">:</span> <span class="kc">false</span><span class="o">,</span>
+        <span class="s">"IPAM"</span><span class="o">:</span> <span class="o">{</span>
+            <span class="s">"Driver"</span><span class="o">:</span> <span class="s">"default"</span><span class="o">,</span>
+            <span class="s">"Options"</span><span class="o">:</span> <span class="o">{},</span>
+            <span class="s">"Config"</span><span class="o">:</span> <span class="o">[</span>
+                <span class="o">{</span>
+                    <span class="s">"Subnet"</span><span class="o">:</span> <span class="s">"172.18.0.0/24"</span>
+                <span class="o">}</span>
+            <span class="o">]</span>
+        <span class="o">},</span>
+        <span class="s">"Internal"</span><span class="o">:</span> <span class="kc">false</span><span class="o">,</span>
+        <span class="s">"Attachable"</span><span class="o">:</span> <span class="kc">false</span><span class="o">,</span>
+        <span class="s">"Containers"</span><span class="o">:</span> <span class="o">{},</span>
+        <span class="s">"Options"</span><span class="o">:</span> <span class="o">{},</span>
+        <span class="s">"Labels"</span><span class="o">:</span> <span class="o">{}</span>
+    <span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div></div>
+<h2 id="3-创建volume">3. 创建Volume</h2>
+<h3 id="31-docke-volume卷命令">3.1 Docke Volume卷命令</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="n">创建网段</span><span class="err">、</span><span class="n">取名为</span><span class="err">：</span><span class="n">v1</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v1</span>
+<span class="err">#</span><span class="n">查看指定卷详细信息</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">inspect</span> <span class="n">v1</span>
+<span class="err">#</span><span class="n">删除指定卷</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">rm</span> <span class="n">v1</span>
+<span class="err">#</span><span class="n">查看卷信息</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">ls</span>
+</code></pre></div></div>
+<h3 id="32-创建卷">3.2 创建卷</h3>
+<p>因为要搭建5个数据库的集群、所以创建5个卷</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v1</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v2</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v3</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v4</span>
+<span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">v5</span>
+</code></pre></div></div>
+<h3 id="33-查看卷">3.3 查看卷</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">inspect</span> <span class="n">v1</span>
+<span class="o">[</span>
+    <span class="o">{</span>
+        <span class="s">"Driver"</span><span class="o">:</span> <span class="s">"local"</span><span class="o">,</span>
+        <span class="s">"Labels"</span><span class="o">:</span> <span class="o">{},</span>
+        <span class="s">"Mountpoint"</span><span class="o">:</span> <span class="s">"/var/lib/docker/volumes/v1/_data"</span><span class="o">,</span>
+        <span class="s">"Name"</span><span class="o">:</span> <span class="s">"v1"</span><span class="o">,</span>
+        <span class="s">"Options"</span><span class="o">:</span> <span class="o">{},</span>
+        <span class="s">"Scope"</span><span class="o">:</span> <span class="s">"local"</span>
+    <span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div></div>
+<h2 id="4-创建mysql-pxc容器">4. 创建MySQL PXC容器</h2>
+<h3 id="41-创建master数据库">4.1 创建Master数据库</h3>
+<p>mysql的默认帐号是: <code class="language-plaintext highlighter-rouge">root</code></p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="n">images</span><span class="o">]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3306</span><span class="o">:</span><span class="mi">3306</span> 
+<span class="o">-</span><span class="n">v</span> <span class="nl">v1:</span><span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_NAME</span><span class="o">=</span><span class="no">PXC</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">XTRABACKUP_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">--</span><span class="n">privileged</span> 
+<span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">my1</span> 
+<span class="o">--</span><span class="n">net</span><span class="o">=</span><span class="n">net1</span> 
+<span class="o">--</span><span class="n">ip</span> <span class="mf">172.18</span><span class="o">.</span><span class="mf">0.2</span>
+<span class="n">percona</span><span class="o">-</span><span class="n">xtradb</span><span class="o">-</span><span class="nl">cluster:</span><span class="n">latest</span>
+</code></pre></div></div>
+<p>参数说明：
+​	-d：后端启动容器
+​	-p:宿主机端口:容器端口，把容器中的端口映射到宿主机的端口上，访问宿主机端口就是直接访问容器
+​	-v:卷:容器目录，把卷挂载在容器里面
+​	-e:启动参数
+​		MYSQL_ROOT_PASSWORD:mysql的密码(自定义)
+​		CLUSTER_NAME:集群名字(自定义)
+​		XTRABACKUP_PASSWORD:数据库节点间数据同步的密码(自定义)
+​	–privileged:授予权限
+​	–name:容器命名
+​	–net:绑定网段
+​	–ip:绑定ip,ip地址为绑定网段内ip
+​	percona-xtradb-cluster:latest:运行的镜像</p>
+
+<h3 id="42-创建备库">4.2 创建备库</h3>
+<h4 id="说明">说明</h4>
+<p>加四个从数据库</p>
+
+<p><strong>特别注意：创建备库的时候、必须要等主库可以成功连接上了、才可以创建、不然会出现容器闪退的问题。原因是容器启动快、但是容器里服务启动慢。</strong></p>
+
+<h4 id="注意事项">注意事项</h4>
+<p>​	1. 修改挂载的卷   <br />
+​	2. 修改宿主机端口，端口唯一  <br />
+​	3. 添加指定的群名,-e CLUSTER_JOIN=my1  <br />
+​	4. 修改容器名  <br />
+​	5. 修改ip  <br />
+​	6. 必须等第一个容器服务创建成功才能创建第二个、通过客户端工具验证，不然会出现闪退情况</p>
+
+<p>my2:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="n">images</span><span class="o">]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3307</span><span class="o">:</span><span class="mi">3306</span> 
+<span class="o">-</span><span class="n">v</span> <span class="nl">v2:</span><span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_NAME</span><span class="o">=</span><span class="no">PXC</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">XTRABACKUP_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_JOIN</span><span class="o">=</span><span class="n">my1</span> 
+<span class="o">--</span><span class="n">privileged</span> 
+<span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">my2</span>
+<span class="o">--</span><span class="n">net</span><span class="o">=</span><span class="n">net1</span> 
+<span class="o">--</span><span class="n">ip</span> <span class="mf">172.18</span><span class="o">.</span><span class="mf">0.3</span>
+<span class="n">percona</span><span class="o">-</span><span class="n">xtradb</span><span class="o">-</span><span class="nl">cluster:</span><span class="n">latest</span>
+</code></pre></div></div>
+<p>参数说明：
+​	CLUSTER_JOIN：需要加入到主集群中、主mysql名字,跟主数据数据同步</p>
+
+<p>my3:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="n">images</span><span class="o">]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3307</span><span class="o">:</span><span class="mi">3306</span> 
+<span class="o">-</span><span class="n">v</span> <span class="nl">v3:</span><span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_NAME</span><span class="o">=</span><span class="no">PXC</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">XTRABACKUP_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_JOIN</span><span class="o">=</span><span class="n">my1</span> 
+<span class="o">--</span><span class="n">privileged</span> 
+<span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">my3</span>
+<span class="o">--</span><span class="n">net</span><span class="o">=</span><span class="n">net1</span> 
+<span class="o">--</span><span class="n">ip</span> <span class="mf">172.18</span><span class="o">.</span><span class="mf">0.4</span>
+<span class="n">percona</span><span class="o">-</span><span class="n">xtradb</span><span class="o">-</span><span class="nl">cluster:</span><span class="n">latest</span>
+</code></pre></div></div>
+<p>my4:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="n">images</span><span class="o">]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3307</span><span class="o">:</span><span class="mi">3306</span> 
+<span class="o">-</span><span class="n">v</span> <span class="nl">v4:</span><span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_NAME</span><span class="o">=</span><span class="no">PXC</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">XTRABACKUP_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_JOIN</span><span class="o">=</span><span class="n">my1</span> 
+<span class="o">--</span><span class="n">privileged</span> 
+<span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">my4</span>
+<span class="o">--</span><span class="n">net</span><span class="o">=</span><span class="n">net1</span> 
+<span class="o">--</span><span class="n">ip</span> <span class="mf">172.18</span><span class="o">.</span><span class="mf">0.5</span>
+<span class="n">percona</span><span class="o">-</span><span class="n">xtradb</span><span class="o">-</span><span class="nl">cluster:</span><span class="n">latest</span>
+</code></pre></div></div>
+<p>my5:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="n">images</span><span class="o">]</span><span class="err">#</span> <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3307</span><span class="o">:</span><span class="mi">3306</span> 
+<span class="o">-</span><span class="n">v</span> <span class="nl">v5:</span><span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_NAME</span><span class="o">=</span><span class="no">PXC</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">XTRABACKUP_PASSWORD</span><span class="o">=</span><span class="n">root123456</span> 
+<span class="o">-</span><span class="n">e</span> <span class="no">CLUSTER_JOIN</span><span class="o">=</span><span class="n">my1</span> 
+<span class="o">--</span><span class="n">privileged</span> 
+<span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">my5</span>
+<span class="o">--</span><span class="n">net</span><span class="o">=</span><span class="n">net1</span> 
+<span class="o">--</span><span class="n">ip</span> <span class="mf">172.18</span><span class="o">.</span><span class="mf">0.6</span>
+<span class="n">percona</span><span class="o">-</span><span class="n">xtradb</span><span class="o">-</span><span class="nl">cluster:</span><span class="n">latest</span>
+</code></pre></div></div>
+<h3 id="连接效果">连接效果</h3>
+
+<p><strong>注意事项：连接的是宿主机的ip和port、并不是容器内部地址</strong></p>
+
+<p><img src="/images/2019-05-17/db.png" alt="测试连接" /></p>
+
+<h3 id="数据同步测试">数据同步测试</h3>
+<ol>
+  <li>打开db1数据库、创建一个schemas(数据库)名为：blank</li>
+  <li>查看db2、db3、db4、db5 数据库是否有自动创建blank数据库</li>
+  <li>在该数据库(db1)创建一个表名：student、并添加数据</li>
+  <li>在任意数据库查看数据是否同步过来</li>
+</ol>
+
+<p><img src="/images/2019-05-17/db1.png" alt="创建数据库" />  <br />
+  创建数据库</p>
+
+<p><img src="/images/2019-05-17/db2.png" alt="添加一条数据" />  <br />
+  添加一条数据</p>
+
+<p><img src="/images/2019-05-17/db3.png" alt="查看其它数据库同步" />  <br />
+  查看其它数据库同步</p>
+
+<h2 id="总结">总结</h2>
+<p>至此、数据库集群已经处理好了，数据同步也已经可以了！
+项目只要连接任意一个数据库就可以同步了！
+缺点：
+​	单节点处理所有请求、负载高、性能差</p>
+
+<p><img src="/images/2019-05-17/tb.png" alt="请求不能分发" />  <br />
+请求不能分发</p>
+
+<blockquote>
+  <p>解决方法：
+ 使用Haproxy做负载均衡、请求被均匀分发给节点，单点负载低，性能好</p>
+</blockquote>
+
+<p><img src="/images/2019-05-17/lb.png" alt="请求不能分发" /></p>
+
+<hr />
+<p>沏与你的这碗茶尚温热，一点十都如本心，九分人间烟火。</p>
+
+<p>– 《好吗好的》</p>
+:ET

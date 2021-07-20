@@ -1,0 +1,55 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+  <li><a href="#命令格式" id="markdown-toc-命令格式">命令格式</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#操作" id="markdown-toc-操作">操作</a>        <ul>
+          <li><a href="#上传" id="markdown-toc-上传">上传</a></li>
+          <li><a href="#下载" id="markdown-toc-下载">下载</a></li>
+        </ul>
+      </li>
+      <li><a href="#注意" id="markdown-toc-注意">注意</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="说明">说明</h3>
+<p>linux 的 scp 命令 可以 在 linux 之间复制/下载 文件 和 目录；</p>
+
+<h3 id="命令格式">命令格式</h3>
+<p>命令基本格式： 
+<code class="language-plaintext highlighter-rouge">scp [可选参数] file_source file_target </code></p>
+
+<h3 id="案例">案例</h3>
+<p>两台服务器：
+<code class="language-plaintext highlighter-rouge">192.168.0.3</code> &gt;  当前登录的服务器
+<code class="language-plaintext highlighter-rouge">192.168.0.4</code></p>
+
+<!--more-->
+
+<h4 id="操作">操作</h4>
+<h5 id="上传">上传</h5>
+<p>命令：</p>
+<blockquote>
+  <p>[root@c5dd5dd5de03 ~]# scp -r /root/demo root@192.168.0.4/root</p>
+</blockquote>
+
+<p>说明：
+把当前登录的root目录下的demo文件上传到传到<code class="language-plaintext highlighter-rouge">192.168.0.4</code>服务器的root目录中</p>
+
+<h5 id="下载">下载</h5>
+<p>命令：</p>
+<blockquote>
+  <p>[root@c5dd5dd5de03 ~]# scp  root@192.168.0.4:/root/test.txt  /root/demo</p>
+</blockquote>
+
+<p>说明：
+把<code class="language-plaintext highlighter-rouge">192.168.0.4</code>服务器中root目录下的<code class="language-plaintext highlighter-rouge">test.txt</code>文件下载到当前<code class="language-plaintext highlighter-rouge">root</code>目录中</p>
+
+<h4 id="注意">注意</h4>
+<p>两者执行<code class="language-plaintext highlighter-rouge">scp</code>命令之后、都需要输入<code class="language-plaintext highlighter-rouge">ssh</code>登录的账号密码，如当前登录的<code class="language-plaintext highlighter-rouge">root</code>密码</p>
+
+<hr />
+<p>目的高尚，会使做的事情都同样高尚。</p>
+
+<p>– 《无神论者望弥撒》</p>
+:ET

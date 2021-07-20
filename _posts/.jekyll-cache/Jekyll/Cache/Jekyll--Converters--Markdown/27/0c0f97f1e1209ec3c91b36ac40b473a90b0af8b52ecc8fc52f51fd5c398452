@@ -1,0 +1,74 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#安装redis服务" id="markdown-toc-安装redis服务">安装Redis服务</a></li>
+  <li><a href="#配置redis服务" id="markdown-toc-配置redis服务">配置Redis服务</a></li>
+  <li><a href="#远程连接redis" id="markdown-toc-远程连接redis">远程连接Redis</a></li>
+</ul>
+
+<p>   通常来说，生产环境下的<strong>Redis</strong>服务器只设置为仅本机访问（<strong>Redis</strong>默认也只允许本机访问 ）。有时候我们也许需要使Redi能被远程访问。</p>
+
+<h4 id="安装redis服务">安装Redis服务</h4>
+<p>@(Linux)[Ubuntu,Centos]</p>
+<ul>
+  <li>Ubuntu
+    <blockquote>
+      <p>apt-get install redis-server</p>
+    </blockquote>
+  </li>
+  <li>Centos
+    <blockquote>
+      <p>yum install redis-server</p>
+    </blockquote>
+  </li>
+</ul>
+
+<p>安装完成后系统会自动启动Redis服务</p>
+
+<!--more-->
+
+<h4 id="配置redis服务">配置Redis服务</h4>
+<p>Redis 默认只能本机连接、不能远程连接，通过修改配置可远程连接<strong>Redis</strong>服务</p>
+
+<p>修改<strong>Redis</strong>配置文件/etc/redis/redis.conf，找到<strong>bind</strong>那行配置：</p>
+<blockquote>
+  <p>bind 127.0.0.1</p>
+</blockquote>
+
+<p>修改为：</p>
+<blockquote>
+  <p>bind 0.0.0.0</p>
+</blockquote>
+
+<p>关于bind配置的含义，配置文件里的注释是这样说的：</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">#</code> By default Redis listens for connections from all the network interfaces<br />
+<code class="language-plaintext highlighter-rouge">#</code> available on the server. It is possible to listen to just one or multiple<br />
+<code class="language-plaintext highlighter-rouge">#</code> interfaces using the “bind” configuration directive, followed by one or<br />
+<code class="language-plaintext highlighter-rouge">#</code> more IP addresses.<br />
+<code class="language-plaintext highlighter-rouge">#</code><br />
+<code class="language-plaintext highlighter-rouge">#</code> Examples:<br />
+<code class="language-plaintext highlighter-rouge">#</code><br />
+<code class="language-plaintext highlighter-rouge">#</code> bind 192.168.1.100 10.0.0.1<br /></p>
+</blockquote>
+
+<p>大概意思是说Redis端口侦听所有的网络接口连接，服务器上可以只听一个或者多个，使用<code class="language-plaintext highlighter-rouge">bind</code> 指定命令。</p>
+
+<h4 id="远程连接redis">远程连接Redis</h4>
+<p>配置好Redis服务并重启服务后。就可以使用客户端远程连接<strong>Redis</strong>服务了。命令格式如下：</p>
+<blockquote>
+  <p>redis-cli -h {redis_host} -p {redis_port}</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">{redis_host}</code>  远程Redis服务所在的服务器地址，<code class="language-plaintext highlighter-rouge">{redis_port}</code> Redis 服务端口(默认 : <em>6379</em>)</p>
+
+<p>例如：</p>
+<blockquote>
+  <p>redis-cli -h 192.168.1.100 -p 6379<br />
+192.168.1.100:6379&gt; ping<br />
+PONG</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">ping</code> 测试是否连接成功、如果出现<strong>PONG</strong>，就代表连接成功！</p>
+
+<p>接下来就尽情的操作Redis吧！</p>
+:ET

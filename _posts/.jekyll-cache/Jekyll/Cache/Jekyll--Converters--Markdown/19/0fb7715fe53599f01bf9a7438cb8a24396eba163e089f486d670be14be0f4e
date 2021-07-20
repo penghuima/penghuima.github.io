@@ -1,0 +1,111 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#配置项目" id="markdown-toc-配置项目">配置项目</a>    <ul>
+      <li><a href="#添加project-structure" id="markdown-toc-添加project-structure">添加Project Structure</a>        <ul>
+          <li><a href="#设置paths" id="markdown-toc-设置paths">设置<code class="language-plaintext highlighter-rouge">Paths</code></a></li>
+          <li><a href="#添加需要部署的lib" id="markdown-toc-添加需要部署的lib">添加需要部署的<code class="language-plaintext highlighter-rouge">lib</code></a></li>
+        </ul>
+      </li>
+      <li><a href="#添加-tomcat" id="markdown-toc-添加-tomcat">添加 Tomcat</a>        <ul>
+          <li><a href="#添加一个本地tomcat" id="markdown-toc-添加一个本地tomcat">添加一个本地Tomcat</a></li>
+          <li><a href="#配置tomcat信息" id="markdown-toc-配置tomcat信息">配置Tomcat信息</a></li>
+          <li><a href="#添加部署项目名" id="markdown-toc-添加部署项目名">添加部署项目名</a></li>
+          <li><a href="#启动tomcat" id="markdown-toc-启动tomcat">启动Tomcat</a></li>
+          <li><a href="#浏览器访问" id="markdown-toc-浏览器访问">浏览器访问</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="配置项目">配置项目</h2>
+<hr />
+<h3 id="添加project-structure">添加Project Structure</h3>
+<p>打开项目设置，快捷键<code class="language-plaintext highlighter-rouge">ctrl + shift + alt</code>
+<img src="/images/2017-03-27/01.png" alt="ProjectStructure|center" /></p>
+<ol>
+  <li>设置Modules</li>
+  <li>设置<code class="language-plaintext highlighter-rouge">classer</code> 编译文件目录
+    <blockquote>
+      <p><code class="language-plaintext highlighter-rouge">提示</code>：<strong>WEB-INF</strong>  默认没有<strong>classes</strong>目录，手动在 WEB-INF 目录中添加 classes 文件夹</p>
+    </blockquote>
+  </li>
+  <li>把<code class="language-plaintext highlighter-rouge">classes</code>文件夹设置为<code class="language-plaintext highlighter-rouge">Excluded</code></li>
+</ol>
+
+<p><!--more--></p>
+<hr />
+<h4 id="设置paths">设置<code class="language-plaintext highlighter-rouge">Paths</code></h4>
+<p><img src="/images/2017-03-27/02.png" alt="path设置|center" /></p>
+
+<p>设置部署输出路径、路径为<code class="language-plaintext highlighter-rouge">WEB-INF</code>下新建的<code class="language-plaintext highlighter-rouge">classes</code>目录</p>
+<hr />
+
+<h4 id="添加需要部署的lib">添加需要部署的<code class="language-plaintext highlighter-rouge">lib</code></h4>
+<p><img src="/images/2017-03-27/03.png" alt="lib|center" /></p>
+
+<blockquote>
+  <p>选中 <code class="language-plaintext highlighter-rouge">Dependencies</code> 右边添加<code class="language-plaintext highlighter-rouge">lib</code>,出现一个下拉框、选择<code class="language-plaintext highlighter-rouge">java</code></p>
+</blockquote>
+
+<p>会弹出现有的<code class="language-plaintext highlighter-rouge">lib</code>、选择 <code class="language-plaintext highlighter-rouge">Tomcat 7.0.23</code>
+<img src="/images/2017-03-27/04.png" alt="Tomcatlib|center" /></p>
+<hr />
+<h3 id="添加-tomcat">添加 Tomcat</h3>
+<p>IDEA 右上角点击图片红圈位置</p>
+
+<p><img src="/images/2017-03-27/05.png" alt="TomcatEdit|center" /></p>
+<hr />
+
+<h5 id="添加一个本地tomcat">添加一个本地Tomcat</h5>
+<p><img src="/images/2017-03-27/06.png" alt="addLocalTomcat|center" /></p>
+<hr />
+
+<h5 id="配置tomcat信息">配置Tomcat信息</h5>
+<p><img src="/images/2017-03-27/07.png" alt="@图七|center" /></p>
+
+<ol>
+  <li>给这个Tomcat 取个名字吧</li>
+  <li>选择Tomcat目录</li>
+  <li>启动完Tomcat之后会自动用选定的浏览器打开项目</li>
+  <li>给Tomcat一个访问地址</li>
+  <li>选择JDK</li>
+  <li>Tomcat 端口 <em>默认即可</em></li>
+</ol>
+
+<hr />
+<h5 id="添加部署项目名">添加部署项目名</h5>
+<p><img src="/images/2017-03-27/08.png" alt="添加部署项目名|center" /></p>
+
+<p>项目部署名浏览器访问项目的名字</p>
+
+<p>与<code class="language-plaintext highlighter-rouge">图七</code>中第<code class="language-plaintext highlighter-rouge">4</code>点搭配使用，如改图片的<code class="language-plaintext highlighter-rouge">项目部署名</code>是<code class="language-plaintext highlighter-rouge">/</code>，那么访问地址是：</p>
+<blockquote>
+  <p>http://localhost:8081/</p>
+</blockquote>
+
+<p>假如把<code class="language-plaintext highlighter-rouge">项目部署名</code>更改为<code class="language-plaintext highlighter-rouge">hello</code>,那么访问地址应该是：</p>
+<blockquote>
+  <p>http://localhost:8081/hello</p>
+</blockquote>
+
+<hr />
+
+<h4 id="启动tomcat">启动Tomcat</h4>
+<p>点击Tomact小绿点、启动Tomcat<br />
+<img src="/images/2017-03-27/09.png" alt="StartTomcat|center" /></p>
+
+<p>启动成功：
+<img src="/images/2017-03-27/10.png" alt="DeploySuccess|center" /></p>
+<hr />
+<h4 id="浏览器访问">浏览器访问</h4>
+<p>输入地址：<code class="language-plaintext highlighter-rouge">http://localhost:8081/</code></p>
+<blockquote>
+  <p><strong>提示</strong>：如果你<code class="language-plaintext highlighter-rouge">图七</code>中第<code class="language-plaintext highlighter-rouge">3</code>个步骤勾选了、浏览器会自动打开这个地址，否则需要手动输入地址！</p>
+</blockquote>
+
+<hr />
+
+<p>效果图：</p>
+
+<p><img src="/images/2017-03-27/11.png" alt="" /></p>
+:ET

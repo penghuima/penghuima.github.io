@@ -1,0 +1,64 @@
+I"s<ul id="markdown-toc">
+  <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+  <li><a href="#使用方法" id="markdown-toc-使用方法">使用方法</a>    <ul>
+      <li><a href="#基本说明" id="markdown-toc-基本说明">基本说明</a></li>
+      <li><a href="#案例" id="markdown-toc-案例">案例</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="说明">说明</h2>
+<p>谷歌浏览器自带截图功能、避免下载各种插件方便。
+<!--more--></p>
+
+<p>主要有以下四种方式：</p>
+<ul>
+  <li>
+    <p>Capture area screenshot</p>
+
+    <blockquote>
+      <p>捕获区域截图：鼠标变成十字图标、可以划取自己需要截图的区域即可</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>Capture full size screenshot</p>
+
+    <blockquote>
+      <p>捕获完整尺寸的屏幕截图</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>Capture node screenshot</p>
+
+    <blockquote>
+      <p>节点截图：审查元素、选择你需要截图的节点在截图</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>Capture screenshot</p>
+
+    <blockquote>
+      <p>屏幕截图：当前可见屏幕内容截图</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h2 id="使用方法">使用方法</h2>
+<h3 id="基本说明">基本说明</h3>
+
+<p>打开chrome 浏览器，进入开发者工具、或直接按<code class="language-plaintext highlighter-rouge">F12</code>即可打开，打开输入命令窗口<code class="language-plaintext highlighter-rouge">ctrl+shift+p</code>、输入关键字<code class="language-plaintext highlighter-rouge">Capture</code>即可会有对应的四个方式显示，打开效果界面如下：</p>
+
+<p><img src="/images/2020-03-21/568fccc62a1e4d26bc148d00fbcbdbfd.png" alt="Capture" /></p>
+
+<h3 id="案例">案例</h3>
+<p>Capture area screenshot：
+ <img src="/images/2020-03-21/20d4a022b58e4049bb6a2c18db3c2256.gif" alt="Capture" title="Capture area screenshot" /></p>
+
+<p>Capture node screenshot：
+ <img src="/images/2020-03-21/889a662236d44ab2871fc4797262e13b.gif" alt="Capture" title="Capture node screenshot" /></p>
+
+<hr />
+<p>追求最适合自己的东西，就是追求的意义。</p>
+
+<p>– 《好吗好的》</p>
+:ET
