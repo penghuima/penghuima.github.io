@@ -1,0 +1,19 @@
+I"O<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+</ul>
+
+<h3 id="简介">简介</h3>
+
+<p>Bazel是Google开源的，类似于Make、Maven或Gradle的构建和测试工具。它使用可读性强的、高层次的构建语言，支持多种编程语言，以及为多种平台进行交叉编译。</p>
+
+<p>Bazel的优势：</p>
+
+<ul>
+  <li>高层次的构建语言：更加简单，Bazel抽象出库、二进制、脚本、数据集等概念，不需要编写调用编译器或链接器的脚本</li>
+  <li>快而可靠：能够缓存所有已经完成的工作步骤，并且跟踪文件内容、构建命令的变动情况，避免重复构建。此外Bazel还支持高度并行构建、增量构建</li>
+  <li>多平台支持：可以在Linux/macOS/Windows上运行，可以构建在桌面/服务器/移动设备上运行的应用程序</li>
+  <li>可扩容性：处理10万以上源码文件时仍然能保持速度</li>
+  <li>可扩展性：支持Android、C/C++、Java、Objective-C、Protocol Buffer、Python…还支持扩展以支持其它语言</li>
+</ul>
+
+:ET

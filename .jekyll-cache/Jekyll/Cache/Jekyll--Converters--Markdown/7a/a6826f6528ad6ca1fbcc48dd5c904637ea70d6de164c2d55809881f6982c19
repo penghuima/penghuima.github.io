@@ -1,0 +1,4 @@
+I"
+<p>OpenFunction 中的 Builders 组件集成了 Tekton 与 Buildpacks ， 用于完成将用户提交的函数代码制作成可以运行在 Kubernetes 中的应用负载镜像这一部分工作。 Tekton 负责编排整个由代码到应用镜像的制作过程，包含：拉取镜像、准备环境变量、使用 Buildpacks 制作镜像、输出镜像到指定仓库等几个主要步骤。 Buildpacks 负责识别代码的语言类型，然后准备好相关 的编译环境，再将代码通过模板渲染为可运行的应用。</p>
+
+:ET
