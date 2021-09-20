@@ -258,7 +258,7 @@ description = "Builder for the  Ruby 2.6"
 ```
 
 - [[buildpacks]] 表示引入的 buildpack ，已经用 bazel 工具将相关代码目录打包成了 tgz 文件，就是封装了 /bin/detect 和 /bin/build 两个功能。
-- [[order]]|[[order.group]] 表示 buildpack 的执行顺序，从下文 of/ruby26镜像构成的 app镜像运行日志中，可以看到运行检测顺序与 [[order]] 顺序一致
+- [[order]] [[order.group]] 表示 buildpack 的执行顺序，从下文 of/ruby26镜像构成的 app镜像运行日志中，可以看到运行检测顺序与 [[order]] 顺序一致
 - [stack] 表示引用的 stack 内容，其中stack id 唯一标识我们上文中创建的 stack
 - [lifecycle] 表示使用的 lifecycle 模块的版本
 
