@@ -1,0 +1,116 @@
+I"s"<ul id="markdown-toc">
+  <li><a href="#创建一个项目" id="markdown-toc-创建一个项目">创建一个项目</a></li>
+  <li><a href="#goroot介绍" id="markdown-toc-goroot介绍">GOROOT介绍</a></li>
+  <li><a href="#gopath-介绍" id="markdown-toc-gopath-介绍">GOPATH 介绍</a></li>
+</ul>
+
+<h3 id="创建一个项目">创建一个项目</h3>
+
+<p>文件 -&gt; 新建 -&gt; 项目 -&gt; Go 模块</p>
+
+<!--more-->
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210920201624271.png" alt="image-20210920201624271" /></p>
+
+<blockquote>
+  <p>位置(L) 项目代码在本地存储的位置</p>
+
+  <p>自动生成 go.mod 包依赖声明文件</p>
+</blockquote>
+
+<p>⚠️ 注意：不要以在第一栏 Go 中创建项目，否则需要自己 go mod init &lt; module name &gt; 来初始化 go.mod 文件，且会有后续包依赖无法同步问题</p>
+
+<blockquote>
+  <p>go mod init &lt; module name &gt;</p>
+
+  <p>go mod tidy</p>
+</blockquote>
+
+<h3 id="goroot介绍">GOROOT介绍</h3>
+
+<p>GoLand 作为 IDE 很好使用，但也需要下载 Go SDK 编译器 （go 1.16）</p>
+
+<p>GOROOT 是一个变量，用于定义您的 Go SDK 所在的位置 （D:\Go\go1.16\path），一些自带的官方程式库（如 fmt 等）就在GOROOT里 （D:\Go\go1.16\path\src）</p>
+
+<p>可以利用 go env 查看环境配置</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>D:<span class="se">\G</span>o<span class="se">\g</span>oland-2020.3.2<span class="se">\d</span>ata<span class="se">\a</span>wesomeProject&gt;go <span class="nb">env
+set </span><span class="nv">GO111MODULE</span><span class="o">=</span>on
+<span class="nb">set </span><span class="nv">GOARCH</span><span class="o">=</span>amd64
+<span class="nb">set </span><span class="nv">GOBIN</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOCACHE</span><span class="o">=</span>C:<span class="se">\U</span>sers<span class="se">\P</span>enghui Ma<span class="se">\A</span>ppData<span class="se">\L</span>ocal<span class="se">\g</span>o-build
+<span class="nb">set </span><span class="nv">GOENV</span><span class="o">=</span>C:<span class="se">\U</span>sers<span class="se">\P</span>enghui Ma<span class="se">\A</span>ppData<span class="se">\R</span>oaming<span class="se">\g</span>o<span class="se">\e</span>nv
+<span class="nb">set </span><span class="nv">GOEXE</span><span class="o">=</span>.exe
+<span class="nb">set </span><span class="nv">GOFLAGS</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOHOSTARCH</span><span class="o">=</span>amd64
+<span class="nb">set </span><span class="nv">GOHOSTOS</span><span class="o">=</span>windows
+<span class="nb">set </span><span class="nv">GOINSECURE</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOMODCACHE</span><span class="o">=</span>D:<span class="se">\G</span>o<span class="se">\g</span>oland-2020.3.2<span class="se">\g</span>o-mod<span class="se">\p</span>kg<span class="se">\m</span><span class="nb">od
+set </span><span class="nv">GONOPROXY</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GONOSUMDB</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOOS</span><span class="o">=</span>windows
+<span class="nb">set </span><span class="nv">GOPATH</span><span class="o">=</span>D:<span class="se">\G</span>o<span class="se">\g</span>oland-2020.3.2<span class="se">\g</span>o-mod
+<span class="nb">set </span><span class="nv">GOPRIVATE</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.io,direct
+<span class="nb">set </span><span class="nv">GOROOT</span><span class="o">=</span>D:<span class="se">\G</span>o<span class="se">\g</span>o1.16<span class="se">\p</span>ath
+<span class="nb">set </span><span class="nv">GOSUMDB</span><span class="o">=</span>sum.golang.org
+<span class="nb">set </span><span class="nv">GOTMPDIR</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOTOOLDIR</span><span class="o">=</span>D:<span class="se">\G</span>o<span class="se">\g</span>o1.16<span class="se">\p</span>ath<span class="se">\p</span>kg<span class="se">\t</span>ool<span class="se">\w</span>indows_amd64
+<span class="nb">set </span><span class="nv">GOVCS</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">GOVERSION</span><span class="o">=</span>go1.16
+<span class="nb">set </span><span class="nv">GCCGO</span><span class="o">=</span>gccgo
+<span class="nb">set </span><span class="nv">AR</span><span class="o">=</span>ar
+<span class="nb">set </span><span class="nv">CC</span><span class="o">=</span>gcc
+<span class="nb">set </span><span class="nv">CXX</span><span class="o">=</span>g++
+<span class="nb">set </span><span class="nv">CGO_ENABLED</span><span class="o">=</span>1
+<span class="nb">set </span><span class="nv">GOMOD</span><span class="o">=</span>D:<span class="se">\G</span>o<span class="se">\g</span>oland-2020.3.2<span class="se">\d</span>ata<span class="se">\s</span>a<span class="se">\g</span>o.mod
+<span class="nb">set </span><span class="nv">CGO_CFLAGS</span><span class="o">=</span><span class="nt">-g</span> <span class="nt">-O2</span>
+<span class="nb">set </span><span class="nv">CGO_CPPFLAGS</span><span class="o">=</span>
+<span class="nb">set </span><span class="nv">CGO_CXXFLAGS</span><span class="o">=</span><span class="nt">-g</span> <span class="nt">-O2</span>
+<span class="nb">set </span><span class="nv">CGO_FFLAGS</span><span class="o">=</span><span class="nt">-g</span> <span class="nt">-O2</span>
+<span class="nb">set </span><span class="nv">CGO_LDFLAGS</span><span class="o">=</span><span class="nt">-g</span> <span class="nt">-O2</span>
+<span class="nb">set </span><span class="nv">PKG_CONFIG</span><span class="o">=</span>pkg-config
+<span class="nb">set </span><span class="nv">GOGCCFLAGS</span><span class="o">=</span><span class="nt">-m64</span> <span class="nt">-mthreads</span> <span class="nt">-fno-caret-diagnostics</span> <span class="nt">-Qunused-arguments</span> <span class="nt">-fmessage-length</span><span class="o">=</span>0 <span class="nt">-fdebug-prefix-map</span><span class="o">=</span>C:<span class="se">\U</span>sers<span class="se">\P</span>ENGHU~1<span class="se">\A</span>ppData<span class="se">\L</span>ocal<span class="se">\T</span>emp<span class="se">\g</span>o-build433074388<span class="o">=</span>/tmp/go-build <span class="nt">-gno-record-gcc-switches</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>在Ｇo 语言中 GOPROXY 是下载依赖包时的代理地址，设置之后可以在国内正常下载 Go/GitHub 仓库的包</p>
+
+  <p>GOPROXY=https://goproxy.io,direct</p>
+
+  <p>GOPROXY 默认值已被墙</p>
+</blockquote>
+
+<h3 id="gopath-介绍">GOPATH 介绍</h3>
+
+<p>上节说到官方的程式库所在位置就是在GOROOT里面，而 GOPATH 就是专门存放第三方（如 GitHub）包依赖的位置，GOPATH 做为 Golang 的第一个包管理模式，只能保证你能用，但不保证好用，直到 go mod 的推出后，</p>
+
+<p>才使 Golang 包的依赖管理达到了能用且好用的标准。</p>
+
+<blockquote>
+  <p>⚠️ Go1.13 开始不再推荐使用 GOPATH。意思就是说你可以在任何路径下存放你的 Go 源码文件, 不用再像以前一样非得放到 $GOPATH/src 中。 每一个 go 项目都是一个 Module。</p>
+</blockquote>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210920202211310.png" alt="image-20210920202211310" /></p>
+
+<blockquote>
+  <p>在 Goland 中使用 go-modul 貌似不是一件容易的事情，最基本的原因是 GOPATH 路径设置不对，$GOPATH 指向了 go.mod 下载存储依赖包所在目录，在本人环境配置下，文件夹 go-mod 保存所需要的第三方依赖包</p>
+</blockquote>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>目录结构
+go-mod
+<span class="nt">------pkg</span>
+<span class="nt">---------mod</span>
+<span class="nt">------------cache</span>
+<span class="nt">------------github</span>.com
+<span class="nt">----------------------blang</span>
+<span class="nt">----------------------gin-gonic</span>
+<span class="nt">-------------------------------gin</span>@v1.7.2   <span class="c">#不同版本包</span>
+<span class="nt">-------------------------------gin</span>@v1.7.4
+<span class="nt">----------------------penghuima</span>
+</code></pre></div></div>
+
+<p>设置项目重新加载设置</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210920210444498.png" alt="image-20210920210444498" /></p>
+:ET

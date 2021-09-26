@@ -1,0 +1,15 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#项目概述" id="markdown-toc-项目概述">项目概述</a></li>
+</ul>
+
+<h3 id="项目概述">项目概述</h3>
+
+<p>项目目标： 开发并优化函数构建器，使其可以识别 Ruby 语言，并将函数构建成可以运行在 OpenFunction 中的应用镜像。</p>
+
+<p>项目背景： OpenFunction 是一个云原生的开源函数即服务（Functions-as-a-Service）平台，旨在让用户专注于他们的业务逻辑，而不必担心底层运行环境和基础设施。用户只需要以函数的形式提交业务相关的源代码，即可将服务按需运行在集群中。 Tekton 是一个云原生的 CI/CD 项目。 Cloud Native Buildpacks （以下简称 Buildpacks ）是一个云原生的 OCI 标准镜像制作工具。</p>
+
+<p>项目详情： OpenFunction 的 builders 组件集成了 Tekton 与 Buildpacks ，用于完成将用户提交的函数代码制作成可以运行在 Kubernetes 中的应用负载镜像这一部分工作。 Tekton 负责编排整个由代码到应用镜像的制作过程，包含：拉取镜像、准备环境变量、使用 Buildpacks 制作镜像、输出镜像到指定仓库 等几个主要步骤。</p>
+
+<p>Buildpacks 负责识别代码的语言类型，然后准备好相关的编译环境，再将代码通过模板渲染为可运行的应用。 我们希望： 它可以支持更多的主流语言（及更多的语言版本） 可以优化代码构建的策略、减少代码构建的时间。</p>
+
+:ET

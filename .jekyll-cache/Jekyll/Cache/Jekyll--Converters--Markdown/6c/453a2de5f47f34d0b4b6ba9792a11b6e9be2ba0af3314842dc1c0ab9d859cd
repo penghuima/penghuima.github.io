@@ -1,0 +1,677 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#项目概述" id="markdown-toc-项目概述">项目概述</a></li>
+  <li><a href="#本地环境" id="markdown-toc-本地环境">本地环境</a></li>
+  <li><a href="#依赖工具" id="markdown-toc-依赖工具">依赖工具</a></li>
+  <li><a href="#goland-配置远程服务器" id="markdown-toc-goland-配置远程服务器">Goland 配置远程服务器</a></li>
+  <li><a href="#build-ruby26-stack" id="markdown-toc-build-ruby26-stack">Build ruby26 stack</a>    <ul>
+      <li><a href="#stack-概述" id="markdown-toc-stack-概述">stack 概述</a></li>
+      <li><a href="#ruby-26-runtime" id="markdown-toc-ruby-26-runtime">ruby 2.6 runtime</a></li>
+      <li><a href="#生成-stack" id="markdown-toc-生成-stack">生成 stack</a></li>
+      <li><a href="#上传镜像" id="markdown-toc-上传镜像">上传镜像</a></li>
+    </ul>
+  </li>
+  <li><a href="#生成builder" id="markdown-toc-生成builder">生成builder</a>    <ul>
+      <li><a href="#builder概述" id="markdown-toc-builder概述">builder概述</a></li>
+      <li><a href="#buildpacks" id="markdown-toc-buildpacks">buildpacks</a></li>
+      <li><a href="#生成-builder" id="markdown-toc-生成-builder">生成 builder</a></li>
+    </ul>
+  </li>
+  <li><a href="#demo-展示" id="markdown-toc-demo-展示">Demo 展示</a>    <ul>
+      <li><a href="#生成-app-image" id="markdown-toc-生成-app-image">生成 app image</a></li>
+      <li><a href="#运行日志" id="markdown-toc-运行日志">运行日志</a></li>
+    </ul>
+  </li>
+  <li><a href="#q--a" id="markdown-toc-q--a">Q &amp; A</a></li>
+</ul>
+
+<h3 id="项目概述">项目概述</h3>
+
+<p>项目目标： 开发并优化函数构建器，使其可以识别 Ruby 语言，并将函数构建成可以运行在 OpenFunction 中的应用镜像。</p>
+
+<p>项目背景： OpenFunction 是一个云原生的开源函数即服务（Functions-as-a-Service）平台，旨在让用户专注于他们的业务逻辑，而不必担心底层运行环境和基础设施。用户只需要以函数的形式提交业务相关的源代码，即可将服务按需运行在集群中。 Tekton 是一个云原生的 CI/CD 项目。 Cloud Native Buildpacks （以下简称 Buildpacks ）是一个云原生的 OCI 标准镜像制作工具。</p>
+
+<p>项目详情： OpenFunction 的 builders 组件集成了 Tekton 与 Buildpacks ，用于完成将用户提交的函数代码制作成可以运行在 Kubernetes 中的应用负载镜像这一部分工作。 Tekton 负责编排整个由代码到应用镜像的制作过程，包含：拉取镜像、准备环境变量、使用 Buildpacks 制作镜像、输出镜像到指定仓库 等几个主要步骤。</p>
+
+<p>Buildpacks 负责识别代码的语言类型，然后准备好相关的编译环境，再将代码通过模板渲染为可运行的应用。 我们希望： 它可以支持更多的主流语言（及更多的语言版本） 可以优化代码构建的策略、减少代码构建的时间。</p>
+
+<!--more-->
+
+<h3 id="本地环境">本地环境</h3>
+
+<ul>
+  <li>Ubuntu 18.04.4   user:ubuntu</li>
+  <li>CPU Core * 8</li>
+  <li>Memory * 8G</li>
+  <li>Goland 2020.3</li>
+</ul>
+
+<h3 id="依赖工具">依赖工具</h3>
+
+<p>整个开发过程需要需要 container-structure-test、Bazel、pack、Docker 这些工具，确保这些工具的执行文件处于 $PATH 目录下。</p>
+
+<ul>
+  <li>
+    <p>安装 Docker</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>docker.io
+<span class="nb">sudo </span>usermod <span class="nt">-aG</span> docker ubuntu
+<span class="nb">sudo chmod </span>a+rw /var/run/docker.sock
+<span class="nb">sudo </span>systemctl restart docker 
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>安装pack</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-sSL</span> <span class="s2">"https://github.com/buildpacks/pack/releases/download/v0.18.1/pack-v0.18.1-linux.tgz"</span> | <span class="nb">sudo tar</span> <span class="nt">-C</span> /usr/local/bin/ <span class="nt">--no-same-owner</span> <span class="nt">-xzv</span> pack
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>安装Bazel (v4.1.0)</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>g++ unzip zip
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>openjdk-11-jdk
+wget https://github.com/bazelbuild/bazel/releases/download/4.1.0/bazel-4.1.0-installer-linux-x86_64.sh
+<span class="nb">chmod</span> +x bazel-4.1.0-installer-linux-x86_64.sh
+./bazel-4.1.0-installer-linux-x86_64.sh <span class="nt">--user</span>
+<span class="nb">sudo mv</span> <span class="nv">$HOME</span>/bin/bazel /usr/local/bin
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>安装 container-structure-test</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-LO</span> https://storage.googleapis.com/container-structure-test/latest/container-structure-test-linux-amd64 <span class="o">&amp;&amp;</span> <span class="nb">chmod</span> +x container-structure-test-linux-amd64 <span class="o">&amp;&amp;</span> <span class="nb">sudo mv </span>container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>建立一条 python3 软连接(可以不需要)</p>
+
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo ln</span> <span class="nt">-s</span> /usr/bin/python3 /usr/bin/python
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>使用以下命令验证是否已准备好所有依赖：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/OpenFunction/builder.git
+<span class="nb">cd </span>builder
+bazel <span class="nb">test</span> <span class="nt">--test_output</span><span class="o">=</span>errors tools/checktools:main_test
+</code></pre></div></div>
+
+<p>如果出现类  INFO: Build completed successfully, 9 total actions 提示信息，说明已经所有依赖安装完成</p>
+
+<h3 id="goland-配置远程服务器">Goland 配置远程服务器</h3>
+
+<p>连接远程服务器，并配置文件同步路径</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210814111538411.png" alt="image-20210814111538411" /></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBedimage-20210814111619937.png" alt="image-20210814111619937" /></p>
+
+<blockquote>
+  <p><a href="https://www.jetbrains.com/help/go/creating-a-remote-server-configuration.html">Create a remote server configuration</a></p>
+
+  <p><a href="https://blog.csdn.net/huwh_/article/details/77879152?utm_source=blogxgwz3">Goland同步插件配置</a></p>
+</blockquote>
+
+<h3 id="build-ruby26-stack">Build ruby26 stack</h3>
+
+<h4 id="stack-概述">stack 概述</h4>
+
+<p>Stack 的功能是提供基础运行环境，它包含两种镜像：</p>
+
+<ul>
+  <li>
+    <p>build ，为 Lifecycle 的 Build 阶段提供运行环境</p>
+  </li>
+  <li>
+    <p>run ，为业务应用提供运行环境</p>
+  </li>
+</ul>
+
+<p>在本项目Openfunction的Ruby函数构建器开发中，需要先准备一个部署有Ruby2.6 runtime 的 stack ，stack 本质为一个基础运行环境，在制作过程中加入 LABEL io.buildpacks.stack.id 即可以指定 stack 的标识。</p>
+
+<blockquote>
+  <p>原生 gcp/buildpacks 将下载语言 runtime 的步骤放置在 buildpack 中，即在探测到语言类型后再下载安装对应的语言 runtime ，本项目选择将语言 runtime 安装在 stack 中，以减少函数构建过程中的时间</p>
+</blockquote>
+
+<h4 id="ruby-26-runtime">ruby 2.6 runtime</h4>
+
+<p>本项目自定义的 ruby2.6 stack ：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM gcr.io/gcp-runtimes/ubuntu_18_0_4
+ARG <span class="nv">cnb_uid</span><span class="o">=</span>1000
+ARG <span class="nv">cnb_gid</span><span class="o">=</span>1000
+ARG <span class="nv">stack_id</span><span class="o">=</span><span class="s2">"openfunction.ruby26"</span>
+<span class="c"># Required by python/runtime: libexpat1, libffi6, libmpdecc2.</span>
+<span class="c"># Required by dotnet/runtime: libicu60</span>
+<span class="c"># Required by go/runtime: tzdata (Go may panic without /usr/share/zoneinfo)</span>
+RUN apt-get update <span class="o">&amp;&amp;</span> apt-get <span class="nb">install</span> <span class="nt">-y</span> <span class="nt">--no-install-recommends</span> <span class="se">\</span>
+  libexpat1 <span class="se">\</span>
+  libffi6 <span class="se">\</span>
+  libmpdec2 <span class="se">\</span>
+  libicu60 <span class="se">\</span>
+  libc++1-9 <span class="se">\</span>
+  tzdata <span class="se">\</span>
+  gcc libc6-dev make  zlib1g zlib1g-dev  openssl libssl-dev <span class="se">\</span>
+  <span class="o">&amp;&amp;</span> apt-get clean <span class="o">&amp;&amp;</span> <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/apt/lists/<span class="k">*</span>
+
+LABEL io.buildpacks.stack.id<span class="o">=</span><span class="k">${</span><span class="nv">stack_id</span><span class="k">}</span>
+
+RUN groupadd cnb <span class="nt">--gid</span> <span class="k">${</span><span class="nv">cnb_gid</span><span class="k">}</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  useradd <span class="nt">--uid</span> <span class="k">${</span><span class="nv">cnb_uid</span><span class="k">}</span> <span class="nt">--gid</span> <span class="k">${</span><span class="nv">cnb_gid</span><span class="k">}</span> <span class="nt">-m</span> <span class="nt">-s</span> /bin/bash cnb
+
+<span class="c"># install ruby runtime</span>
+RUN <span class="nb">cd</span> /tmp <span class="o">&amp;&amp;</span> <span class="nb">mkdir </span>ruby <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ruby <span class="o">&amp;&amp;</span> curl  https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz | <span class="nb">tar </span>xz <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ruby-2.6.6 <span class="o">&amp;&amp;</span> ./configure <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span>  <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ext/zlib <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> ruby extconf.rb <span class="o">&amp;&amp;</span> <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s?$(top_srcdir)?../..?g'</span> Makefile  <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span> <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ../openssl <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> ruby extconf.rb <span class="o">&amp;&amp;</span> <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s?$(top_srcdir)?../..?g'</span> Makefile <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span> <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> gem uninstall bundle <span class="o">&amp;&amp;</span> gem <span class="nb">install </span>bundler <span class="nt">-v</span> 2.1.4 <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ../../
+
+ENV <span class="nv">CNB_USER_ID</span><span class="o">=</span><span class="k">${</span><span class="nv">cnb_uid</span><span class="k">}</span>
+ENV <span class="nv">CNB_GROUP_ID</span><span class="o">=</span><span class="k">${</span><span class="nv">cnb_gid</span><span class="k">}</span>
+ENV <span class="nv">CNB_STACK_ID</span><span class="o">=</span><span class="k">${</span><span class="nv">stack_id</span><span class="k">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>完整文件请参考 <a href="ruby26/stack">ruby26/stack</a></p>
+</blockquote>
+
+<h4 id="生成-stack">生成 stack</h4>
+
+<p>开始在根目录 builder/ 下执行 ruby2.6 stack 构建命令</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bazel run //builders/ruby26/stack:build
+</code></pre></div></div>
+
+<p>This command creates three images:</p>
+
+<ul>
+  <li><strong>ruby26common</strong></li>
+  <li><strong>openfunctiondev/buildpacks-ruby26-run:v1</strong></li>
+  <li><strong>openfunctiondev/buildpacks-ruby26-build:v1</strong></li>
+</ul>
+
+<p>如下所示</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ubuntu@i-a1kwg7lk:~/mph/builder<span class="nv">$ </span>docker images
+REPOSITORY                                TAG       IMAGE ID       CREATED         SIZE
+openfunctiondev/buildpacks-ruby26-build   v1        18a6f7e4c4b6   3 minutes ago   1.04GB
+openfunctiondev/buildpacks-ruby26-run     v1        e221e925ecc5   4 minutes ago   791MB
+ruby26common                              latest    c21fa60b9e9c   4 minutes ago   791MB
+gcr.io/gcp-runtimes/ubuntu_18_0_4         latest    93a9bd0cfd2e   51 years ago    76.7MB
+</code></pre></div></div>
+
+<p>验证 ruby 2.6 runtime</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ubuntu@i-a1kwg7lk:~/mph/builder<span class="nv">$ </span>docker run <span class="nt">-it</span> <span class="nt">--name</span> build-runtime openfunctiondev/buildpacks-ruby26-build:v1 /bin/bash
+cnb@67882f6e62ab:/<span class="nv">$ </span>which ruby
+/usr/local/bin/ruby
+cnb@67882f6e62ab:/<span class="nv">$ </span>bundle <span class="nt">-v</span>
+Bundler version 2.1.4
+
+ubuntu@i-a1kwg7lk:~/mph/builder<span class="nv">$ </span>docker run <span class="nt">-it</span> <span class="nt">--name</span> run-runtime openfunctiondev/buildpacks-ruby26-run:v1 /bin/bash
+cnb@704a89adc952:/<span class="nv">$ </span>which ruby
+/usr/local/bin/ruby
+cnb@704a89adc952:/<span class="nv">$ </span>bundle <span class="nt">-v</span>
+Bundler version 2.1.4
+</code></pre></div></div>
+
+<h4 id="上传镜像">上传镜像</h4>
+
+<p>可以将 build 和 run 镜像上传到自己的镜像仓库</p>
+
+<p>docker login -u xxxxx(dockerhub注册的docker用户名)，登录docker成功</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker login <span class="nt">-u</span> penghuima
+docker tag openfunctiondev/buildpacks-ruby26-build:v1 penghuima/buildpacks-ruby26-build:v1
+docker tag openfunctiondev/buildpacks-ruby26-run:v1 penghuima/buildpacks-ruby26-run:v1
+docker push penghuima/buildpacks-ruby26-build:v1
+docker push penghuima/buildpacks-ruby26-run:v1
+</code></pre></div></div>
+
+<h3 id="生成builder">生成builder</h3>
+
+<h4 id="builder概述">builder概述</h4>
+
+<p>Builder 描述了一个完整的构建编排逻辑。它本质上是将  Stack 及若干个 Buildpack 组合在一起，形成一个业务逻辑明确的构建工具。Builder是一个镜像，其中包含执行构建所需的所有组件。构建器镜像是通过stack镜像并添加生命周期、构建包和文件来创建的，这些文件配置构建的各个方面，包括构建包检测顺序和运行镜像的位置。</p>
+
+<p><img src="https://buildpacks.io/docs/concepts/components/create-builder.svg" alt="create-builder diagram" /></p>
+
+<p>本项目builder的定义文件 builder.toml内容如下</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>description <span class="o">=</span> <span class="s2">"Builder for the  Ruby 2.6"</span>
+
+<span class="o">[[</span>buildpacks]]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.functions-framework"</span>
+  uri <span class="o">=</span> <span class="s2">"ruby/functions_framework.tgz"</span>
+
+<span class="o">[[</span>buildpacks]]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.bundle"</span>
+  uri <span class="o">=</span> <span class="s2">"ruby/bundle.tgz"</span>
+
+<span class="o">[[</span>buildpacks]]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.config.entrypoint"</span>
+  uri <span class="o">=</span> <span class="s2">"entrypoint.tgz"</span>
+
+<span class="o">[[</span>buildpacks]]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.utils.label"</span>
+  uri <span class="o">=</span> <span class="s2">"label.tgz"</span>
+
+<span class="o">[[</span>order]]
+
+  <span class="o">[[</span>order.group]]
+    <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.bundle"</span>
+
+  <span class="o">[[</span>order.group]]
+    <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.functions-framework"</span>
+
+  <span class="o">[[</span>buildpacks]]
+    <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.config.entrypoint"</span>
+
+  <span class="o">[[</span>order.group]]
+    <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.utils.label"</span>
+
+<span class="o">[</span>stack]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"openfunction.ruby26"</span>
+  build-image <span class="o">=</span> <span class="s2">"openfunctiondev/buildpacks-ruby26-build:v1"</span>
+  run-image <span class="o">=</span> <span class="s2">"openfunctiondev/buildpacks-ruby26-run:v1"</span>
+
+<span class="o">[</span>lifecycle]
+  version <span class="o">=</span> <span class="s2">"0.11.1"</span>
+</code></pre></div></div>
+
+<ul>
+  <li>[[buildpacks]] 表示引入的 buildpack ，已经用 bazel 工具将相关代码目录打包成了 tgz 文件，就是封装了 /bin/detect 和 /bin/build 两个功能。</li>
+  <li>[[order]] [[order.group]] 表示 buildpack 的执行顺序，从下文 of/ruby26镜像构成的 app镜像运行日志中，可以看到运行检测顺序与 [[order]] 顺序一致</li>
+  <li>[stack] 表示引用的 stack 内容，其中stack id 唯一标识我们上文中创建的 stack</li>
+  <li>[lifecycle] 表示使用的 lifecycle 模块的版本</li>
+</ul>
+
+<h4 id="buildpacks">buildpacks</h4>
+
+<p>Buildpack 可以理解为任务单一的构建单元，用于检查您的应用程序源代码并制定构建和运行应用程序的计划。每一个 buildpack 都具备以下三个元素：</p>
+
+<ul>
+  <li>buildpack.toml ，描述了 buildpack 的元数据。</li>
+  <li>bin/detect ，Lifecycle 中 Detect 阶段的实现，确定是否应用该buildpack。</li>
+  <li>bin/build ，Lifecycle 中 Build 阶段的实现，执行buildpack逻辑。</li>
+</ul>
+
+<p>它的工作原理可以简单理解为：bin/detect 将会判断是否可以进入该 buildpack ，如果可以进入该 buildpack ，那么 Lifecycle 就会指导流程进入 Build 阶段同时触发 bin/build 执行。</p>
+
+<p>每个 buildpack 完成后都会产出一份清单，用于表明自己产出了什么内容（可为空），且如果要完成后续的 buildpack 过程，还需要什么内容（可为空）。</p>
+
+<p>同时在 Build 阶段，基于复用构建逻辑的原则，buildpack 的作者可以设置不通过的 layer （layer 内保存了所关联的构建过程的结果，如文件、运行时等内容），并设置 build 、launch 、cache 三种属性。Lifecycle 将根据这三个参数的组合来决定是否复用一个 layer。</p>
+
+<p>以 id 为  “google.ruby.functions-framework” 的 ruby 函数框架这一 buildpack 为例，其元数据在 [buildpack] 中定义，[[stacks]] 用于描述 buildpack 可以运行在哪些 stack 上</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>api <span class="o">=</span> <span class="s2">"0.2"</span>
+
+<span class="o">[</span>buildpack]
+<span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.functions-framework"</span>
+version <span class="o">=</span> <span class="s2">"0.9.1"</span>
+name <span class="o">=</span> <span class="s2">"Ruby - Functions Framework"</span>
+
+<span class="o">[[</span>stacks]]
+<span class="nb">id</span> <span class="o">=</span> <span class="s2">"openfunction.ruby26"</span>
+
+<span class="o">[[</span>stacks]]
+<span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby27"</span>
+</code></pre></div></div>
+
+<h4 id="生成-builder">生成 builder</h4>
+
+<p>开始在根目录 builder/ 下执行 ruby2.6 builder 构建命令</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bazel build //builders/ruby26:builder.image
+</code></pre></div></div>
+
+<p>This command creates one image:</p>
+
+<ul>
+  <li><strong>of/ruby26</strong></li>
+</ul>
+
+<p>生成 builder 日志</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ubuntu@i-a1kwg7lk:~/mph/builder<span class="nv">$ </span>bazel build //builders/ruby26:builder.image
+INFO: Analyzed target //builders/ruby26:builder.image <span class="o">(</span>54 packages loaded, 6870 targets configured<span class="o">)</span><span class="nb">.</span>
+INFO: Found 1 target...
+INFO: From Executing genrule //builders/ruby26:builder.image:
+2021/08/14 14:58:20 Checking tools
+2021/08/14 14:58:20 pack found at /usr/local/bin/pack
+2021/08/14 14:58:20 docker found at /usr/bin/docker
+2021/08/14 14:58:20 container-structure-test found at /usr/local/bin/container-structure-test
+2021/08/14 14:58:20 Checking pack version
+2021/08/14 14:58:20 Found pack version 0.18.1+git-b5c1a96.build-2373
+Extracting builder <span class="nb">tar</span>:
+./
+./builder.toml
+./label.tgz
+./ruby/
+./ruby/functions_framework.tgz
+./ruby/bundle.tgz
+Warning: Command <span class="s1">'pack create-builder'</span> has been deprecated, please use <span class="s1">'pack builder create'</span> instead
+Downloading from <span class="s1">'https://github.com/buildpacks/lifecycle/releases/download/v0.11.1/lifecycle-v0.11.1+linux.x86-64.tgz'</span>
+5.25 MB/5.25 MB
+Successfully created builder image <span class="s1">'of/ruby26'</span>
+Tip: Run <span class="s1">'pack build &lt;image-name&gt; --builder of/ruby26'</span> to use this builder
+Target //builders/ruby26:builder.image up-to-date:
+  bazel-bin/builders/ruby26/builder.sha
+INFO: Elapsed <span class="nb">time</span>: 14.209s, Critical Path: 12.22s
+INFO: 48 processes: 19 internal, 28 linux-sandbox, 1 local.
+INFO: Build completed successfully, 48 total actions
+</code></pre></div></div>
+
+<h3 id="demo-展示">Demo 展示</h3>
+
+<p>本节通过展示一个简单的  hello  word 例子来演示 builder 是如何工作的</p>
+
+<blockquote>
+  <p>git clone https://github.com/penghuima/samples.git</p>
+
+  <p>cd  samples/functions/Knative/hello-world-ruby/</p>
+</blockquote>
+
+<p>sample里主要有三个文件 app.rb、Gemfile、Gemfile.lock 内容如下</p>
+
+<ul>
+  <li>
+    <p>app.rb</p>
+
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"functions_framework"</span>
+<span class="no">FunctionsFramework</span><span class="p">.</span><span class="nf">http</span><span class="p">(</span><span class="s2">"Hello-World"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">request</span><span class="o">|</span>
+  <span class="s2">"Hello, world!  Hello Ruby!</span><span class="se">\n</span><span class="s2">"</span>
+<span class="k">end</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Gemfile</p>
+
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">source</span> <span class="s2">"https://rubygems.org"</span>
+<span class="n">gem</span> <span class="s2">"functions_framework"</span><span class="p">,</span> <span class="s2">"~&gt; 1.0"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Gemfile.lock</p>
+
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">GEM</span>
+  <span class="ss">remote: </span><span class="n">https</span><span class="ss">:/</span><span class="o">/</span><span class="n">rubygems</span><span class="p">.</span><span class="nf">org</span><span class="o">/</span>
+  <span class="ss">specs:
+    </span><span class="n">cloud_events</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">functions_framework</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+      <span class="n">cloud_events</span> <span class="p">(</span><span class="o">&gt;=</span> <span class="mf">0.5</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">.</span><span class="nf">a</span><span class="p">)</span>
+      <span class="n">puma</span> <span class="p">(</span><span class="o">&gt;=</span> <span class="mf">4.3</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">.</span><span class="nf">a</span><span class="p">)</span>
+      <span class="n">rack</span> <span class="p">(</span><span class="o">~&gt;</span> <span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">nio4r</span> <span class="p">(</span><span class="mf">2.5</span><span class="o">.</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">puma</span> <span class="p">(</span><span class="mf">5.3</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">nio4r</span> <span class="p">(</span><span class="o">~&gt;</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">rack</span> <span class="p">(</span><span class="mf">2.2</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+  
+<span class="no">PLATFORMS</span>
+  <span class="n">ruby</span>
+  
+<span class="no">DEPENDENCIES</span>
+  <span class="n">functions_framework</span> <span class="p">(</span><span class="o">~&gt;</span> <span class="mf">1.0</span><span class="p">)</span>
+  
+<span class="no">BUNDLED</span> <span class="no">WITH</span>
+   <span class="mf">2.1</span><span class="o">.</span><span class="mi">4</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="生成-app-image">生成 app image</h4>
+
+<p>原理如下图所示，由 builder镜像和源码文件 生成 app images</p>
+
+<p><img src="https://buildpacks.io/docs/concepts/operations/build.svg" alt="build diagram" /></p>
+
+<p>Download samples:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/penghuima/samples.git    
+<span class="nb">cd  </span>samples/functions/Knative/hello-world-ruby/
+</code></pre></div></div>
+
+<p>Build the function:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pack build <span class="k">function</span><span class="nt">-ruby</span> <span class="nt">--builder</span> of/ruby26 <span class="nt">--env</span> <span class="nv">FUNC_NAME</span><span class="o">=</span><span class="s2">"Hello-World"</span>
+docker run <span class="nt">--rm</span> <span class="nt">-p8080</span>:8080 <span class="k">function</span><span class="nt">-ruby</span>
+</code></pre></div></div>
+
+<p>Visit the function:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080
+</code></pre></div></div>
+
+<p>Output example:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hello, world!  Hello Ruby!
+</code></pre></div></div>
+
+<h4 id="运行日志">运行日志</h4>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ubuntu@i-a1kwg7lk:~/mph/samples/functions/Knative/hello-world-ruby<span class="nv">$ </span>pack build <span class="k">function</span><span class="nt">-ruby</span> <span class="nt">--builder</span> of/ruby26 <span class="nt">--env</span> <span class="nv">FUNC_NAME</span><span class="o">=</span><span class="s2">"Hello-World"</span>
+v1: Pulling from openfunctiondev/buildpacks-ruby26-run
+Digest: sha256:f428f2272085771fd21353d3c3ba58ce1e755f47608dc11e2bd19d5f85df4066
+Status: Image is up to <span class="nb">date </span><span class="k">for </span>openfunctiondev/buildpacks-ruby26-run:v1
+0.11.1: Pulling from buildpacksio/lifecycle
+Digest: sha256:2ca9870d9472400792bdc2d43ded8df2642ffcf937e8cd01685836678c28780b
+Status: Image is up to <span class="nb">date </span><span class="k">for </span>buildpacksio/lifecycle:0.11.1
+<span class="o">===&gt;</span> DETECTING
+<span class="o">[</span>detector] google.ruby.bundle              0.9.0
+<span class="o">[</span>detector] google.ruby.functions-framework 0.9.1
+<span class="o">[</span>detector] google.utils.label              0.0.1
+<span class="o">===&gt;</span> ANALYZING
+<span class="o">[</span>analyzer] Previous image with name <span class="s2">"function-ruby"</span> not found
+<span class="o">===&gt;</span> RESTORING
+<span class="o">===&gt;</span> BUILDING
+<span class="o">[</span>builder] <span class="o">===</span> Ruby - Bundle <span class="o">(</span>google.ruby.bundle@0.9.0<span class="o">)</span> <span class="o">===</span>
+<span class="o">[</span>builder] Installing application dependencies.
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local without development test"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local without development test"</span> <span class="o">(</span>213.701121ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local path .bundle/gems"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local path .bundle/gems"</span> <span class="o">(</span>204.372547ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle lock --add-platform x86_64-linux"</span>
+<span class="o">[</span>builder] Fetching gem metadata from https://rubygems.org/...
+<span class="o">[</span>builder] Resolving dependencies...
+<span class="o">[</span>builder] Writing lockfile to /workspace/Gemfile.lock
+<span class="o">[</span>builder] Done <span class="s2">"bundle lock --add-platform x86_64-linux"</span> <span class="o">(</span>4.131479657s<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle lock --add-platform ruby"</span>
+<span class="o">[</span>builder] Fetching gem metadata from https://rubygems.org/..
+<span class="o">[</span>builder] Writing lockfile to /workspace/Gemfile.lock
+<span class="o">[</span>builder] Done <span class="s2">"bundle lock --add-platform ruby"</span> <span class="o">(</span>1.109658296s<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local deployment true"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local deployment true"</span> <span class="o">(</span>206.397619ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local frozen true"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local frozen true"</span> <span class="o">(</span>192.510552ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local without development test"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local without development test"</span> <span class="o">(</span>214.752127ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle config --local path .bundle/gems"</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle config --local path .bundle/gems"</span> <span class="o">(</span>218.378794ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle install (NOKOGIRI_USE_SYSTEM_LIBRARIES=1 MALLOC_ARENA_MAX=2 LANG=C.utf8)"</span>
+<span class="o">[</span>builder] Fetching gem metadata from https://rubygems.org/..
+<span class="o">[</span>builder] Using bundler 2.1.4
+<span class="o">[</span>builder] Fetching cloud_events 0.5.1
+<span class="o">[</span>builder] Installing cloud_events 0.5.1
+<span class="o">[</span>builder] Fetching nio4r 2.5.7
+<span class="o">[</span>builder] Installing nio4r 2.5.7 with native extensions
+<span class="o">[</span>builder] Fetching puma 5.3.2
+<span class="o">[</span>builder] Installing puma 5.3.2 with native extensions
+<span class="o">[</span>builder] Fetching rack 2.2.3
+<span class="o">[</span>builder] Installing rack 2.2.3
+<span class="o">[</span>builder] Fetching functions_framework 1.0.0
+<span class="o">[</span>builder] Installing functions_framework 1.0.0
+<span class="o">[</span>builder] Bundle <span class="nb">complete</span><span class="o">!</span> 1 Gemfile dependency, 6 gems now installed.
+<span class="o">[</span>builder] Gems <span class="k">in </span>the <span class="nb">groups </span>development and <span class="nb">test </span>were not installed.
+<span class="o">[</span>builder] Bundled gems are installed into <span class="sb">`</span>./.bundle/gems<span class="sb">`</span>
+<span class="o">[</span>builder] Done <span class="s2">"bundle install (NOKOGIRI_USE_SYSTEM_LIBRARIES=1 MALLOC_ARENA..."</span> <span class="o">(</span>8.561774732s<span class="o">)</span>
+<span class="o">[</span>builder] <span class="o">===</span> Ruby - Functions Framework <span class="o">(</span>google.ruby.functions-framework@0.9.1<span class="o">)</span> <span class="o">===</span>
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] Running <span class="s2">"bundle exec functions-framework-ruby --quiet --verify --source app.rb --target Hello-World (MALLOC_ARENA_MAX=2 LANG=C.utf8 RACK_ENV=production)"</span>
+<span class="o">[</span>builder] OK
+<span class="o">[</span>builder] Done <span class="s2">"bundle exec functions-framework-ruby --quiet --verify --sour..."</span> <span class="o">(</span>319.197753ms<span class="o">)</span>
+<span class="o">[</span>builder] <span class="o">===</span> Utils - Label Image <span class="o">(</span>google.utils.label@0.0.1<span class="o">)</span> <span class="o">===</span>
+<span class="o">===&gt;</span> EXPORTING
+<span class="o">[</span>exporter] Adding layer <span class="s1">'google.ruby.bundle:gems'</span>
+<span class="o">[</span>exporter] Adding layer <span class="s1">'google.ruby.functions-framework:functions-framework'</span>
+<span class="o">[</span>exporter] Adding 1/1 app layer<span class="o">(</span>s<span class="o">)</span>
+<span class="o">[</span>exporter] Adding layer <span class="s1">'launcher'</span>
+<span class="o">[</span>exporter] Adding layer <span class="s1">'config'</span>
+<span class="o">[</span>exporter] Adding layer <span class="s1">'process-types'</span>
+<span class="o">[</span>exporter] Adding label <span class="s1">'io.buildpacks.lifecycle.metadata'</span>
+<span class="o">[</span>exporter] Adding label <span class="s1">'io.buildpacks.build.metadata'</span>
+<span class="o">[</span>exporter] Adding label <span class="s1">'io.buildpacks.project.metadata'</span>
+<span class="o">[</span>exporter] Setting default process <span class="nb">type</span> <span class="s1">'web'</span>
+<span class="o">[</span>exporter] Saving <span class="k">function</span><span class="nt">-ruby</span>...
+<span class="o">[</span>exporter] <span class="k">***</span> Images <span class="o">(</span>d46c60a6b4b8<span class="o">)</span>:
+<span class="o">[</span>exporter]       <span class="k">function</span><span class="nt">-ruby</span>
+<span class="o">[</span>exporter] Adding cache layer <span class="s1">'google.ruby.bundle:gems'</span>
+Successfully built image <span class="k">function</span><span class="nt">-ruby</span>
+ubuntu@i-a1kwg7lk:~/mph/samples/functions/Knative/hello-world-ruby<span class="nv">$ </span>docker images
+REPOSITORY                                TAG       IMAGE ID       CREATED        SIZE
+openfunctiondev/buildpacks-ruby26-build   v1        18a6f7e4c4b6   6 hours ago    1.04GB
+openfunctiondev/buildpacks-ruby26-run     v1        e221e925ecc5   6 hours ago    791MB
+buildpacksio/lifecycle                    0.11.1    67c0e8a0dbed   41 years ago   15.7MB
+of/ruby26                                 latest    19d1b18882a7   41 years ago   1.07GB
+<span class="k">function</span><span class="nt">-ruby</span>                             latest    d46c60a6b4b8   41 years ago   801MB
+ubuntu@i-a1kwg7lk:~/mph/samples/functions/Knative/hello-world-ruby<span class="nv">$ </span>docker run <span class="nt">--rm</span> <span class="nt">-p8080</span>:8080 <span class="k">function</span><span class="nt">-ruby</span>
+I, <span class="o">[</span>2021-08-14T09:41:20.648220 <span class="c">#1]  INFO -- : FunctionsFramework v1.0.0</span>
+I, <span class="o">[</span>2021-08-14T09:41:20.648325 <span class="c">#1]  INFO -- : FunctionsFramework: Loading functions from "./app.rb"...</span>
+I, <span class="o">[</span>2021-08-14T09:41:20.648584 <span class="c">#1]  INFO -- : FunctionsFramework: Looking for function name "Hello-World"...</span>
+I, <span class="o">[</span>2021-08-14T09:41:20.648653 <span class="c">#1]  INFO -- : FunctionsFramework: Starting server...</span>
+I, <span class="o">[</span>2021-08-14T09:41:20.715425 <span class="c">#1]  INFO -- : FunctionsFramework: Serving function "Hello-World" on port 8080...</span>
+ubuntu@i-a1kwg7lk:~<span class="nv">$ </span>curl http://localhost:8080
+Hello, world!  Hello Ruby!
+</code></pre></div></div>
+
+<h3 id="q--a">Q &amp; A</h3>
+
+<p><strong>Q1:</strong> ERROR: failed to add buildpacks to builder: downloading buildpack: extracting from registry ‘bundle.tgz’: fetching image: image ‘bundle.tgz’ does not exist on the daemon: not found
+Extracting builder tar:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>openfunction6@cloudshell:~/mph/builder<span class="nv">$ </span>bazel build //builders/ruby26:builder.image
+INFO: Analyzed target //builders/ruby26:builder.image <span class="o">(</span>1 packages loaded, 5 targets configured<span class="o">)</span><span class="nb">.</span>
+INFO: Found 1 target...
+ERROR: /home/openfunction6/mph/builder/builders/ruby26/BUILD.bazel:7:8: Executing genrule //builders/ruby26:builder.image failed: <span class="o">(</span>Exit 1<span class="o">)</span>: bash failed: error executing <span class="nb">command</span> /bin/bash <span class="nt">-c</span> ... <span class="o">(</span>remaining 1 argument<span class="o">(</span>s<span class="o">)</span> skipped<span class="o">)</span>
+2021/08/04 09:09:31 Checking tools
+2021/08/04 09:09:31 pack found at /usr/local/bin/pack
+2021/08/04 09:09:31 docker found at /usr/bin/docker
+2021/08/04 09:09:31 container-structure-test found at /usr/local/bin/container-structure-test
+2021/08/04 09:09:31 Checking pack version
+2021/08/04 09:09:31 Found pack version 0.20.0+git-66a4f32.build-2668
+ERROR: failed to add buildpacks to builder: downloading buildpack: extracting from registry <span class="s1">'bundle.tgz'</span>: fetching image: image <span class="s1">'bundle.tgz'</span> does not exist on the daemon: not found
+Extracting builder <span class="nb">tar</span>:
+./
+./builder.toml
+./label.tgz
+./ruby/
+./ruby/bundle.tgz
+./ruby/functions_framework.tgz
+Warning: Command <span class="s1">'pack create-builder'</span> has been deprecated, please use <span class="s1">'pack builder create'</span> instead
+Downloading from <span class="s1">'https://github.com/buildpacks/lifecycle/releases/download/v0.11.1/lifecycle-v0.11.1+linux.x86-64.tgz'</span>
+5.25 MB/5.25 MB
+Target //builders/ruby26:builder.image failed to build
+Use <span class="nt">--verbose_failures</span> to see the <span class="nb">command </span>lines of failed build steps.
+</code></pre></div></div>
+
+<p><strong>A1:</strong> 这是由于 builder.toml 里的路径设置不正确导致，正确路径为</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[[</span>buildpacks]]
+  <span class="nb">id</span> <span class="o">=</span> <span class="s2">"google.ruby.bundle"</span>
+  uri <span class="o">=</span> <span class="s2">"ruby/bundle.tgz"</span>
+</code></pre></div></div>
+
+<p><strong>Q2:</strong>  [builder] /usr/local/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require’: cannot load such file – zlib (LoadError)</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>openfunction6@cloudshell:~/mph/samples/functions/Knative/hello-world-ruby<span class="nv">$ </span>pack build <span class="k">function</span><span class="nt">-ruby1</span> <span class="nt">--builder</span> penghuima/ruby26  <span class="nt">--env</span> <span class="nv">FUNC_NAME</span><span class="o">=</span><span class="s2">"Hello-World"</span>
+v1: Pulling from penghuima/buildpacks-ruby26-run
+Digest: sha256:241dbbb3eefe5ef0a4ee5d471933ed331eb6a18d20cf5cdeffb6f9da6a44cc35
+Status: Image is up to <span class="nb">date </span><span class="k">for </span>penghuima/buildpacks-ruby26-run:v1
+0.11.1: Pulling from buildpacksio/lifecycle
+Digest: sha256:2ca9870d9472400792bdc2d43ded8df2642ffcf937e8cd01685836678c28780b
+<span class="o">[</span>builder] Running <span class="s2">"bundle lock --add-platform x86_64-linux"</span>
+<span class="o">[</span>builder] /usr/local/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in <span class="sb">`</span>require<span class="s1">': cannot load such file -- zlib (LoadError)
+[builder]       from /usr/local/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/fetcher.rb:6:in <span class="sb">`</span>&lt;top <span class="o">(</span>required<span class="o">)&gt;</span><span class="s1">'
+[builder]       from /usr/local/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in <span class="sb">`</span>require<span class="s1">'
+[builder]       from /usr/local/lib/ruby/2.6.0/bundler/cli/lock.rb:21:in `run'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/cli.rb:643:in <span class="sb">`</span>lock<span class="s1">'
+[builder]       from /usr/local/lib/ruby/2.6.0/bundler/vendor/thor/lib/thor/command.rb:27:in `run'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/vendor/thor/lib/thor/invocation.rb:126:in <span class="sb">`</span>invoke_command<span class="s1">'
+[builder]       from /usr/local/lib/ruby/2.6.0/bundler/vendor/thor/lib/thor.rb:387:in `dispatch'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/cli.rb:27:in <span class="sb">`</span>dispatch<span class="s1">'
+[builder]       from /usr/local/lib/ruby/2.6.0/bundler/vendor/thor/lib/thor/base.rb:466:in `start'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/cli.rb:18:in <span class="sb">`</span>start<span class="s1">'
+[builder]       from /usr/local/lib/ruby/gems/2.6.0/gems/bundler-1.17.2/exe/bundle:30:in `block in &lt;top (required)&gt;'</span>
+<span class="o">[</span>builder]       from /usr/local/lib/ruby/2.6.0/bundler/friendly_errors.rb:124:in <span class="sb">`</span>with_friendly_errors<span class="s1">'
+[builder]       from /usr/local/lib/ruby/gems/2.6.0/gems/bundler-1.17.2/exe/bundle:22:in `&lt;top (required)&gt;'</span>
+<span class="o">[</span>builder]       from /usr/local/bin/bundle:23:in <span class="sb">`</span>load<span class="s1">'
+[builder]       from /usr/local/bin/bundle:23:in `&lt;main&gt;'</span>
+<span class="o">[</span>builder] Sorry your project couldn<span class="s1">'t be built.
+[builder] Our documentation explains ways to configure Buildpacks to better recognise your project:
+[builder]  -&gt; https://github.com/GoogleCloudPlatform/buildpacks/blob/main/README.md
+[builder] If you think you'</span>ve found an issue, please report it:
+<span class="o">[</span>builder]  -&gt; https://github.com/GoogleCloudPlatform/buildpacks/issues/new
+<span class="o">[</span>builder] <span class="nt">--------------------------------------------------------------------------------</span>
+<span class="o">[</span>builder] ERROR: failed to build: <span class="nb">exit </span>status 1
+ERROR: failed to build: executing lifecycle. This may be the result of using an untrusted builder: failed with status code: 51
+</code></pre></div></div>
+
+<p><strong>A2：</strong>这是由于 stack 运行时安装少依赖 zlib 导致的,安装ruby时缺少 openssl 和 zlib</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">***</span> Following extensions are not compiled:
+dbm:
+        Could not be configured. It will not be installed.
+        Check ext/dbm/mkmf.log <span class="k">for </span>more details.
+gdbm:
+        Could not be configured. It will not be installed.
+        Check ext/gdbm/mkmf.log <span class="k">for </span>more details.
+openssl:
+        Could not be configured. It will not be installed.
+        /tmp/ruby/ruby-2.6.7/ext/openssl/extconf.rb:97: OpenSSL library could not be found. You might want to use <span class="nt">--with-openssl-dir</span><span class="o">=</span>&lt;<span class="nb">dir</span><span class="o">&gt;</span>                            option to specify the prefix where OpenSSL is installed.
+        Check ext/openssl/mkmf.log <span class="k">for </span>more details.
+readline:
+        Could not be configured. It will not be installed.
+        /tmp/ruby/ruby-2.6.7/ext/readline/extconf.rb:62: Neither readline nor libedit was found
+        Check ext/readline/mkmf.log <span class="k">for </span>more details.
+zlib:
+        Could not be configured. It will not be installed.
+        Check ext/zlib/mkmf.log <span class="k">for </span>more details.
+</code></pre></div></div>
+
+<blockquote>
+  <p>解决方案，<a href="https://blog.csdn.net/qq_41690477/article/details/82750530">参考 1</a>  <a href="https://blog.csdn.net/Wangdada111/article/details/73382554?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-1.control&amp;spm=1001.2101.3001.4242">参考2</a></p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># install ruby runtime</span>
+RUN <span class="nb">cd</span> /tmp <span class="o">&amp;&amp;</span> <span class="nb">mkdir </span>ruby <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ruby <span class="o">&amp;&amp;</span> curl  https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz | <span class="nb">tar </span>xz <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ruby-2.6.6 <span class="o">&amp;&amp;</span> ./configure <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span>  <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ext/zlib <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> ruby extconf.rb <span class="o">&amp;&amp;</span> <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s?$(top_srcdir)?../..?g'</span> Makefile  <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span> <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ../openssl <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> ruby extconf.rb <span class="o">&amp;&amp;</span> <span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s?$(top_srcdir)?../..?g'</span> Makefile <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make <span class="nb">install</span> <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> gem uninstall bundle <span class="o">&amp;&amp;</span> gem <span class="nb">install </span>bundler <span class="nt">-v</span> 2.1.4 <span class="se">\</span>
+</code></pre></div></div>
+
+<p><strong>Q3：</strong>缺少 Gemfile.lock文件</p>
+
+<p><strong>A3:</strong>  补充文件，注意依赖版本问题</p>
+
+<p><strong>Q4：</strong>stack 里 build 和 run 镜像 bundler 版本不一致，一个为 2.1.4 ，一个为 1.17.2</p>
+
+<p><strong>A4：</strong> 卸载默认bundler版本，统一版本为2.1.4</p>
+
+:ET
