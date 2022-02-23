@@ -1,0 +1,16 @@
+I"&<ul id="markdown-toc">
+  <li><a href="#重点key-takeaways" id="markdown-toc-重点key-takeaways">重点（Key Takeaways）</a></li>
+</ul>
+
+<h3 id="重点key-takeaways">重点（Key Takeaways）</h3>
+
+<ul>
+  <li>构建分布式系统并非易事。围绕 “微服务” 架构和 “ 12要素应用程序” 设计有很多最佳实践。这些最佳实践提供了与交付生命周期、网路、状态管理、外部依赖绑定相关的指导原则。</li>
+  <li>然而，以<strong>可扩展</strong>和<strong>可维护</strong>的方式一致地实施这些原则却充满挑战。</li>
+  <li>为实施这些原则，传统的技术化方法有企业服务总线（ESB）和面向消息的中间件（MOM）。虽然这些解决方案提供了良好的功能特性，但主要的挑战在于<strong>单体架构（monolithic architecture）</strong>以及业务逻辑和平台之间的紧密技术耦合。</li>
+  <li>随着云、容器和容器编排工具（Kubernetes）的流行，出现了实施这些原则的新解决方案。例如 Knative 用于交付，服务网格用于网络，而 Camel-K 用于绑定和集成。</li>
+  <li>通过这种方法，业务逻辑（称为“微逻辑”）构成了应用程序的核心，边车 “Mecha” 组件创建可提供强大的开箱即用（out-of-the-box）的分布式<strong>原语（primitive）</strong>。</li>
+  <li>微逻辑（Micrologic ）组件和 Mecha 组件的解耦可以改善day-2操作，例如打补丁和升级，并有助于维持业务逻辑内聚单元的长期可维护性。</li>
+</ul>
+
+:ET
