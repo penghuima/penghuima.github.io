@@ -1,0 +1,332 @@
+I"�k<ul id="markdown-toc">
+  <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+  <li><a href="#内存形式" id="markdown-toc-内存形式">内存形式</a></li>
+  <li><a href="#值类型与引用类型" id="markdown-toc-值类型与引用类型">值类型与引用类型</a></li>
+  <li><a href="#声明切片" id="markdown-toc-声明切片">声明切片</a>    <ul>
+      <li><a href="#make-声明切片" id="markdown-toc-make-声明切片"><strong>make 声明切片</strong></a></li>
+      <li><a href="#切片字面量" id="markdown-toc-切片字面量">切片字面量</a></li>
+      <li><a href="#nil切片" id="markdown-toc-nil切片">nil切片</a></li>
+      <li><a href="#空切片" id="markdown-toc-空切片">空切片</a></li>
+    </ul>
+  </li>
+  <li><a href="#两个切片共用一个底层数据" id="markdown-toc-两个切片共用一个底层数据">两个切片共用一个底层数据</a>    <ul>
+      <li><a href="#修改数据操作" id="markdown-toc-修改数据操作">修改数据操作</a></li>
+      <li><a href="#添加数据操作" id="markdown-toc-添加数据操作">添加数据操作</a></li>
+      <li><a href="#使添加操作不影响原切片" id="markdown-toc-使添加操作不影响原切片">使添加操作不影响原切片</a></li>
+      <li><a href="#扩容" id="markdown-toc-扩容">扩容</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="说明">说明</h3>
+
+<p><code class="language-plaintext highlighter-rouge">切片(Slice)</code>是<code class="language-plaintext highlighter-rouge">go</code>提供的一种便捷操作<strong>数组</strong>的数据结构。可以按需自动增长和缩小数组，切片通过<code class="language-plaintext highlighter-rouge">append</code>函数来动态添加底层数组数据。因为切片的底层是数组，所以在内存中是在连续内存块中分配内存的，所以切片可以和数组一样获得索引，迭代以及垃圾回收优化等好处。</p>
+
+<!--more-->
+
+<h3 id="内存形式">内存形式</h3>
+
+<p><strong>数组在内存中的布局</strong></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220104215438.png" alt="image-20220104215438421" /></p>
+
+<p><strong>切片在内存中的布局</strong></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220104231314.png" alt="image-20220104231314160" /></p>
+
+<p>通过上图可以清晰的理解切片在内存中的形式，其实切片可以看作一种数据结构，在内存中也是占一部分空间的，如果表示出来，可以用 <code class="language-plaintext highlighter-rouge">&amp;slice</code> 查看形如 <code class="language-plaintext highlighter-rouge">0x.......</code></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//类似的结构</span>
+<span class="k">type</span> <span class="n">slice</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="n">ptr</span> <span class="o">*</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="kt">int</span>  <span class="c">//地址指针</span>
+    <span class="nb">len</span> <span class="kt">int</span>      <span class="c">//长度</span>
+    <span class="n">cmp</span> <span class="kt">int</span>      <span class="c">//容量</span>
+<span class="p">}</span>
+<span class="c">// src/runtime/string.go 在底层实际上是这样定义的</span>
+<span class="k">type</span> <span class="n">slice</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">array</span> <span class="n">unsafe</span><span class="o">.</span><span class="n">Pointer</span>
+	<span class="nb">len</span>   <span class="kt">int</span>
+	<span class="nb">cap</span>   <span class="kt">int</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>从下面可以看到切片的第一位元素和数组的下标为1的元素的地址相同都为<code class="language-plaintext highlighter-rouge">0xc0000101c8</code>，切片数据结构的地址空间指向<code class="language-plaintext highlighter-rouge">0xc000004078</code> 也验证了切片在内存中的布局的确如上图所示。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">array</span> <span class="o">:=</span> <span class="p">[</span><span class="m">4</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">}</span>
+	<span class="n">slice</span> <span class="o">:=</span> <span class="n">array</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"切片元素："</span><span class="p">,</span> <span class="n">slice</span><span class="p">,</span> <span class="s">"切片长度："</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">slice</span><span class="p">),</span> <span class="s">"切片容量："</span><span class="p">,</span> <span class="nb">cap</span><span class="p">(</span><span class="n">slice</span><span class="p">))</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"数组地址空间首地址：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">array</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"切片地址空间首地址是：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">slice</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"数组a[1]的地址是：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">array</span><span class="p">[</span><span class="m">1</span><span class="p">])</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"切片b[0]地址是：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">slice</span><span class="p">[</span><span class="m">0</span><span class="p">])</span>
+<span class="p">}</span>
+<span class="c">/* 输出
+切片元素： [2] 切片长度： 1 切片容量： 3
+数组地址空间首地址：0xc0000101c0
+切片地址空间首地址是：0xc000004078
+数组a[1]的地址是：0xc0000101c8
+切片b[0]地址是：0xc0000101c8
+*/</span>
+</code></pre></div></div>
+
+<h3 id="值类型与引用类型">值类型与引用类型</h3>
+
+<p><strong>值类型</strong>: 当值类型数据需要被传递时，传递的总是内存中的数据的副本</p>
+
+<p><strong>引用类型</strong>：引用类型需要被传递时，传递的总是对应数据的首地址</p>
+
+<ul>
+  <li>
+    <p><strong>==Go的数组属值类型==，在默认情况下是值传递，因此会进行值拷贝。数组间不会相互影响</strong></p>
+
+    <blockquote>
+      <p>别的语言的数组貌似是引用传递</p>
+    </blockquote>
+
+    <p><strong>demo1</strong></p>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">a</span><span class="o">:=</span><span class="p">[</span><span class="m">10</span><span class="p">]</span><span class="kt">int8</span><span class="p">{}</span>
+	<span class="n">b</span><span class="o">:=</span><span class="n">a</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"a:%p  b:%p"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c">// 输出    a:0xc000102070  b:0xc000102080</span>
+</code></pre></div>    </div>
+
+    <p>a,b不同的内存地址，说明了b数组开辟了新的内存空间，a将数据复制到了b对应的内存中</p>
+
+    <p><strong>demo2</strong></p>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">array</span> <span class="o">:=</span> <span class="p">[</span><span class="m">4</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">}</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="c">//输出[1 2 3 4]</span>
+	<span class="n">test</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="c">//输出[1 2 3 4]</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="n">test</span><span class="p">(</span><span class="n">array</span> <span class="p">[</span><span class="m">4</span><span class="p">]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">array</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">100</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>切片是引用类型，所以在传递时，遵守引用传递机制</strong></p>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">array</span> <span class="o">:=</span> <span class="p">[</span><span class="m">4</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">}</span>
+	<span class="n">slice</span> <span class="o">:=</span> <span class="n">array</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>   <span class="c">//输出 [1]</span>
+	<span class="n">slice2</span> <span class="o">:=</span> <span class="n">slice</span>
+	<span class="n">slice2</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">99</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>  <span class="c">//输出 [99]</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>  <span class="c">//输出 [99]</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>  <span class="c">//输出 [1，99，3，4]</span>
+	<span class="n">test</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>  <span class="c">//输出 [1，100，3，4]</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>   <span class="c">//输出 [1，100，3，4]</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="n">test</span><span class="p">(</span><span class="n">slice</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">slice</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">100</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+
+    <p>但是有个情况说明一下，虽然切片是引用类型，但在传参的时候其实还是值传递，相当于将切片的数据结构复制了一份，这两个数据结构虽然内存空间不同，但指针却指向同一个数组</p>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">arr</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">10</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"arr的地址：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">arr</span><span class="p">)</span>
+	<span class="n">change</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"arr的地址：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">arr</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+  
+<span class="p">}</span>
+<span class="k">func</span> <span class="n">change</span><span class="p">(</span><span class="n">arr1</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">arr1</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="o">=</span><span class="m">100</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"arr1:"</span><span class="p">,</span><span class="n">arr1</span><span class="p">)</span>           
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"arr1的地址：%p</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">arr1</span><span class="p">)</span>  <span class="c">//和arr的地址空间不一样</span>
+<span class="p">}</span>
+<span class="c">/*输出
+arr: [0 0 0 0 0]
+arr的地址：0xc000004078
+arr1: [100 0 0 0 0]
+arr1的地址：0xc0000040a8
+arr的地址：0xc000004078
+[100 0 0 0 0]
+*/</span>
+</code></pre></div>    </div>
+
+    <blockquote>
+      <p>这其实是 Go 语言本身为了减少内存占用，提高整体的性能才这么设计的。</p>
+
+      <p>将切片复制到任意函数的时候，对底层数组大小都不会影响。==复制时只会复制切片本身（值传递），不会涉及底层数组。==</p>
+
+      <p>也就是在函数间传递切片，其只拷贝 24 个字节（指针字段 8 个字节，长度和容量分别需要 8 个字节），效率很高。</p>
+
+      <p><strong>坑</strong></p>
+
+      <p>这种设计也引出了新的问题，在平时通过 <code class="language-plaintext highlighter-rouge">s[i:j]</code> 所生成的新切片，两个切片底层指向的是同一个底层数组。</p>
+
+      <p>假设<strong>在没有超过容量（cap）的情况下，对第二个切片操作会影响第一个切片</strong>。</p>
+
+      <p>这是很多 Go 开发常会碰到的一个大 “坑”，不清楚的排查了很久的都不得而终。</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="声明切片">声明切片</h3>
+
+<h4 id="make-声明切片"><strong>make 声明切片</strong></h4>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// 声明切片 容量为4  类型int初始化默认值为0</span>
+<span class="n">slice</span><span class="o">:=</span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="m">4</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>       <span class="c">// 输出 [0 0 0 0]</span>
+</code></pre></div></div>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/16131e4dda0743e18929104a12377327~tplv-k3u1fbpfcp-watermark.awebp" alt="slice1" /></p>
+
+<h4 id="切片字面量">切片字面量</h4>
+
+<blockquote>
+  <p>如果在<code class="language-plaintext highlighter-rouge">[]</code>运算符里指定了一个值，那么创建的就不是切片，而是数组。只有不指定值的时候才会创建切片</p>
+</blockquote>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// 创建一个容量为4的切片，并赋初始值</span>
+<span class="n">slice</span><span class="o">:=</span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">}</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>        <span class="c">// 输出  [1 2 3 4]</span>
+</code></pre></div></div>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/46396e1e96f045148f5f0ead5e9b8025~tplv-k3u1fbpfcp-watermark.awebp" alt="slice2" /></p>
+
+<p><strong>创建切片的两种方式</strong></p>
+
+<ul>
+  <li>make创建切片，make也会创建一个数组，是由切片在底层进行维护；</li>
+  <li>其它方式是直接引用数组，这个数组是事先存在的，程序员可见的；</li>
+</ul>
+
+<h4 id="nil切片">nil切片</h4>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// 声明nil切片  此时不会初始化默认值</span>
+<span class="k">var</span> <span class="n">slice</span> <span class="p">[]</span><span class="kt">int</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>      <span class="c">// 输出  []</span>
+</code></pre></div></div>
+
+<h4 id="空切片">空切片</h4>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// 空切片 没有初始化默认值</span>
+<span class="n">slice</span><span class="o">:=</span><span class="p">[]</span><span class="kt">int</span><span class="p">{}</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>     <span class="c">// 输出 []</span>
+</code></pre></div></div>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c015368a11c54965ac9cc07dc3d8e27f~tplv-k3u1fbpfcp-watermark.awebp" alt="slice3" /></p>
+
+<h3 id="两个切片共用一个底层数据">两个切片共用一个底层数据</h3>
+
+<h4 id="修改数据操作">修改数据操作</h4>
+
+<ul>
+  <li>
+    <p><strong>声明两个切片共用一个底层数组</strong></p>
+
+    <blockquote>
+      <p><strong>slice2 := slice[1:3]   可以看成  slice2 := slice[ｘ:y]</strong>，因为slice底层数组容量为４，</p>
+
+      <p>所以slice2的长度为：<strong>y-x</strong>（3-1=2）。容量为：<strong>4-x</strong>（4-1=3）==好好看下容量的计算方式==</p>
+    </blockquote>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">slice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">}</span>
+<span class="n">slice2</span> <span class="o">:=</span> <span class="n">slice</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">3</span><span class="p">]</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>
+<span class="c">/* 输出
+[1 2 3 4]
+[2 3]
+*/</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7dda992e90a04bff83b423b8fcac5b51~tplv-k3u1fbpfcp-watermark.awebp" alt="slice4" /></p>
+
+<ul>
+  <li>
+    <p><strong>修改slice2切片的数据</strong></p>
+
+    <blockquote>
+      <p>同时也修改了slice的值</p>
+    </blockquote>
+
+    <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">slice2</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="m">99</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>
+<span class="c">/* 输出
+[1 2 99 4]
+[2 99]
+*/</span>
+</code></pre></div>    </div>
+
+    <p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f8dcec9063aa45d391e8479595ce3f6a~tplv-k3u1fbpfcp-watermark.awebp" alt="slice5" /></p>
+  </li>
+</ul>
+
+<h4 id="添加数据操作">添加数据操作</h4>
+
+<p>在上面数据基础上添加一个数据到<strong>slice2</strong></p>
+
+<blockquote>
+  <p>同时会修改<strong>slice</strong>的值，因为底层数组是同一个</p>
+</blockquote>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">slice2</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">slice2</span><span class="p">,</span><span class="m">66</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>
+<span class="c">/* 输出
+[1 2 99 66]
+[2 99 66]
+*/</span>
+</code></pre></div></div>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/15c1ab6357784475ae4a3af8d63dde0e~tplv-k3u1fbpfcp-watermark.awebp" alt="slice6" /></p>
+
+<h4 id="使添加操作不影响原切片">使添加操作不影响原切片</h4>
+
+<p>解决这个问题就是在赋值时<strong>使用切片字面量的第三个参数</strong></p>
+
+<blockquote>
+  <p><strong>slice2 := slice[1:２:2] **可以看成</strong>slice2 := slice[x:y:z] **因为slice底层数组容量为４，</p>
+
+  <p>所以slice2的长度为：<strong>y-x</strong>（2-1=1）， slice2的容量为：<strong>z-x</strong>（2-1=1）</p>
+</blockquote>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">slice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">}</span>
+<span class="c">//slice2 := slice[1:3]</span>
+<span class="c">// 设置限制容量为2-1=1 </span>
+<span class="n">slice2</span> <span class="o">:=</span> <span class="n">slice</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="o">:</span><span class="m">2</span><span class="p">]</span>
+<span class="c">// 添加参数slice2将进行扩容　扩容到原来的２倍</span>
+<span class="n">slice2</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">slice2</span><span class="p">,</span><span class="m">66</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">slice2</span><span class="p">)</span>
+<span class="c">/* 输出
+[1 2 3 4]
+[2 66]
+*/</span>
+</code></pre></div></div>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2897acae5f474c82be896aeb49ba451c~tplv-k3u1fbpfcp-watermark.awebp" alt="slice7" /></p>
+
+<h4 id="扩容">扩容</h4>
+
+<p>在切片容量小于<strong>1000个元素</strong>时，总是会成倍地增加容量，一旦元素超过1000，容量的<strong>增长因子会设为1.25</strong>，也就是会每次增加25%的容量。随着<code class="language-plaintext highlighter-rouge">go</code>不断的迭代更新，这种增长算法可能会有所改变。</p>
+
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9fdd6f244b5d4a95b59b4179ec479cf3~tplv-k3u1fbpfcp-watermark.awebp" alt="slice8" /></p>
+
+<p>参考</p>
+
+<blockquote>
+  <p><a href="https://juejin.cn/post/6945221073008853023">【图】图解go切片｜Go主题月 - 掘金 (juejin.cn)</a></p>
+
+  <p><a href="https://juejin.cn/post/6943983836183134215">GO成神之路：你真的会使用数组与切片吗？｜Go主题月 - 掘金 (juejin.cn)</a></p>
+</blockquote>
+
+:ET

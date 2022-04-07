@@ -1,0 +1,9 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+</ul>
+
+<h3 id="说明">说明</h3>
+
+<p><code class="language-plaintext highlighter-rouge">切片(Slice)</code>是<code class="language-plaintext highlighter-rouge">go</code>提供的一种便捷操作<strong>数组</strong>的数据结构。可以按需自动增长和缩小数组，切片通过<code class="language-plaintext highlighter-rouge">append</code>函数来动态添加底层数组数据。因为切片的底层是数组，所以在内存中是在连续内存块中分配内存的，所以切片可以和数组一样获得索引，迭代以及垃圾回收优化等好处。</p>
+
+:ET
