@@ -1,0 +1,701 @@
+I"v�<ul id="markdown-toc">
+  <li><a href="#git-配置多个github账户" id="markdown-toc-git-配置多个github账户">Git 配置多个github账户</a>    <ul>
+      <li><a href="#正确使用说明" id="markdown-toc-正确使用说明">正确使用说明</a>        <ul>
+          <li><a href="#commit的时候签名切换" id="markdown-toc-commit的时候签名切换">commit的时候签名切换</a></li>
+          <li><a href="#push的时候权限等问题" id="markdown-toc-push的时候权限等问题">push的时候权限等问题</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#git-图解" id="markdown-toc-git-图解">Git 图解</a>    <ul>
+      <li><a href="#基本用法" id="markdown-toc-基本用法">基本用法</a></li>
+      <li><a href="#约定" id="markdown-toc-约定">约定</a></li>
+      <li><a href="#命令详解" id="markdown-toc-命令详解">命令详解</a>        <ul>
+          <li><a href="#diff" id="markdown-toc-diff">Diff</a></li>
+          <li><a href="#commit" id="markdown-toc-commit">Commit</a></li>
+          <li><a href="#checkout" id="markdown-toc-checkout">Checkout</a></li>
+          <li><a href="#detached-head分离的head" id="markdown-toc-detached-head分离的head">detached HEAD(分离的HEAD)</a></li>
+          <li><a href="#reset" id="markdown-toc-reset">Reset</a></li>
+          <li><a href="#merge" id="markdown-toc-merge">Merge</a></li>
+          <li><a href="#cherry-pick" id="markdown-toc-cherry-pick">Cherry-Pick</a></li>
+          <li><a href="#rebase" id="markdown-toc-rebase">Rebase</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#奇淫技巧" id="markdown-toc-奇淫技巧">奇淫技巧</a>    <ul>
+      <li><a href="#checkout检出提交--检出文件" id="markdown-toc-checkout检出提交--检出文件">checkout检出提交 || 检出文件</a>        <ul>
+          <li><a href="#检出文件" id="markdown-toc-检出文件">检出文件</a></li>
+          <li><a href="#检出分支" id="markdown-toc-检出分支">检出分支</a></li>
+        </ul>
+      </li>
+      <li><a href="#git-status" id="markdown-toc-git-status">git status</a></li>
+      <li><a href="#git-add-之后想撤销" id="markdown-toc-git-add-之后想撤销">git add 之后想撤销</a></li>
+      <li><a href="#分支合并mergerebase" id="markdown-toc-分支合并mergerebase">分支合并（merge/rebase）</a>        <ul>
+          <li><a href="#rebase-1" id="markdown-toc-rebase-1">rebase</a></li>
+          <li><a href="#merge-1" id="markdown-toc-merge-1">merge</a></li>
+        </ul>
+      </li>
+      <li><a href="#交互式rebese-整理自己私有仓库的提交" id="markdown-toc-交互式rebese-整理自己私有仓库的提交">交互式rebese (整理自己私有仓库的提交)</a>        <ul>
+          <li><a href="#合并多个提交" id="markdown-toc-合并多个提交">合并多个提交</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#不要重设公共历史" id="markdown-toc-不要重设公共历史">不要重设公共历史</a>    <ul>
+      <li><a href="#不要使用-git-reset-修改公共历史" id="markdown-toc-不要使用-git-reset-修改公共历史">不要使用 git reset 修改公共历史</a></li>
+      <li><a href="#谨慎使用-git-commit-amend" id="markdown-toc-谨慎使用-git-commit-amend">谨慎使用 git commit –amend</a></li>
+      <li><a href="#不要-rebase-公共历史" id="markdown-toc-不要-rebase-公共历史">不要 rebase 公共历史</a></li>
+      <li><a href="#远程分支" id="markdown-toc-远程分支">远程分支</a>        <ul>
+          <li><a href="#git-fetch" id="markdown-toc-git-fetch">git fetch</a></li>
+          <li><a href="#git-pull" id="markdown-toc-git-pull">git pull</a></li>
+          <li><a href="#git-push" id="markdown-toc-git-push">git push</a></li>
+        </ul>
+      </li>
+      <li><a href="#pull-request" id="markdown-toc-pull-request">pull request</a>        <ul>
+          <li><a href="#fork工作流" id="markdown-toc-fork工作流">fork工作流</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#查看分支图" id="markdown-toc-查看分支图">查看分支图</a></li>
+  <li><a href="#从理论到实践" id="markdown-toc-从理论到实践">从理论到实践</a></li>
+</ul>
+
+<h2 id="git-配置多个github账户">Git 配置多个github账户</h2>
+
+<ul>
+  <li>
+    <p>首先我们需要在<code class="language-plaintext highlighter-rouge">C:\Users\用户名\.ssh</code>（windows用户）下，生成两对 <code class="language-plaintext highlighter-rouge">ssh key</code> (公钥、私钥)</p>
+  </li>
+  <li>
+    <p>然后在 <code class="language-plaintext highlighter-rouge">ssh</code> 目录下创建 <code class="language-plaintext highlighter-rouge">config</code> 文件并配置内容如下</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># user one</span>
+Host penghuima   <span class="c">#Host myhost（这里是自定义的host简称，以后连接远程服务器就可以用命令ssh myhost）</span>
+HostName github.com  <span class="c">#HostName 主机名可用ip也可以是域名(如:github.com或者bitbucket.org)</span>
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa
+  
+<span class="c"># user two </span>
+Host nudtpcm
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa_two
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>在GitHub 账户中部署添加 <code class="language-plaintext highlighter-rouge">ssh</code> 公钥</p>
+  </li>
+  <li>
+    <p>远程测试</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-T</span> git@penghuima  <span class="c">#在config文件里配置host的命名</span>
+ssh <span class="nt">-T</span> git@nudtpcm
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<!--more-->
+
+<h3 id="正确使用说明">正确使用说明</h3>
+
+<p>由于是配置多个github账户，因此我们在commit的时候需要注意签名设置，以及push的时候权限等问题。</p>
+
+<h4 id="commit的时候签名切换">commit的时候签名切换</h4>
+
+<p>​	为每个克隆下来的仓库设置局部的用户名和邮箱</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 取消全局 用户名/邮箱 配置</span>
+git config <span class="nt">--global</span> <span class="nt">--unset</span> user.name
+git config <span class="nt">--global</span> <span class="nt">--unset</span> user.email
+
+<span class="c"># 单独为每个repo设置 用户名/邮箱</span>
+git config user.name <span class="s2">"penghuima"</span> <span class="p">;</span> git config user.email <span class="s2">"2992426202@qq.com"</span>
+git config user.name <span class="s2">"nudtpcm"</span> <span class="p">;</span> git config user.email <span class="s2">"maph9916@163.com"</span>
+</code></pre></div></div>
+
+<h4 id="push的时候权限等问题">push的时候权限等问题</h4>
+
+<p>​	使用 ssh 方式克隆代码</p>
+
+<ul>
+  <li>
+    <p>原来的写法</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@github.com: one的用户名/learngit.git
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>现在的写法</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@penghuima: one的用户名/learngit.git  <span class="c">#@后面跟 HOST 命名</span>
+git clone git@nudtpcm: two的用户名/learngit.git
+</code></pre></div>    </div>
+
+    <p><strong>必须要这样 ssh 克隆，不然push的时候会遇到权限问题，而无法成功</strong></p>
+
+    <blockquote>
+      <p><a href="https://blog.csdn.net/qiannz/article/details/121118042">403错误解决方案</a></p>
+
+      <p><a href="https://www.jianshu.com/p/912fe8c95908">想要弹出输入用户名、密码（填token序列）窗口</a>：<code class="language-plaintext highlighter-rouge">git config --global --unset credential.helper</code></p>
+
+      <p><a href="https://blog.csdn.net/weixin_44523860/article/details/122389041">阻止github每次push都要输入账号密码</a>：<code class="language-plaintext highlighter-rouge">git config --global credential.helper store</code></p>
+    </blockquote>
+  </li>
+</ul>
+
+<p>参考</p>
+
+<blockquote>
+  <p><a href="https://blog.csdn.net/qq_33254766/article/details/122941664">一台电脑上的git同时使用两个github账户</a></p>
+
+  <p><a href="https://blog.51cto.com/u_4160094/2912836">Git配置多个github账号</a></p>
+</blockquote>
+
+<h2 id="git-图解">Git 图解</h2>
+
+<blockquote>
+  <p><a href="http://marklodato.github.io/visual-git-guide/index-zh-cn.html">原文</a></p>
+
+  <p><a href="https://github.com/geeeeeeeeek/git-recipes">git-recipes</a></p>
+</blockquote>
+
+<h3 id="基本用法">基本用法</h3>
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405232642.png" alt="image-20220405232642216" /></p>
+
+<p>上面的四条命令在工作目录、stage 缓存(也叫做索引)和 commit 历史之间复制文件。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">git add files</code> 把工作目录中的文件加入 stage 缓存</li>
+  <li><code class="language-plaintext highlighter-rouge">git commit</code> 把 stage 缓存生成一次 commit，并加入 commit 历史</li>
+  <li><code class="language-plaintext highlighter-rouge">git reset -- files</code> 撤销最后一次 <code class="language-plaintext highlighter-rouge">git add files</code>，你也可以用 <code class="language-plaintext highlighter-rouge">git reset</code> 撤销所有 stage 缓存文件</li>
+  <li><code class="language-plaintext highlighter-rouge">git checkout -- files</code> 把文件从 stage 缓存复制到工作目录，用来丢弃本地修改</li>
+</ul>
+
+<p>你可以用 <code class="language-plaintext highlighter-rouge">git reset -p</code>、<code class="language-plaintext highlighter-rouge">git checkout -p</code> 或 <code class="language-plaintext highlighter-rouge">git add -p</code> 进入交互模式，也可以跳过 stage 缓存直接从  commit历史取出文件或者直接提交代码。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405232720.png" alt="enter image description here" /></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">git commit -a </code> 相当于运行 <code class="language-plaintext highlighter-rouge">git add</code> 把所有当前目录下的文件加入 stage 缓存再运行 <code class="language-plaintext highlighter-rouge">git commit</code>。</li>
+  <li><code class="language-plaintext highlighter-rouge">git commit files</code> 进行一次包含最后一次提交加上工作目录中文件快照的提交，并且文件被添加到 stage 缓存。</li>
+  <li><code class="language-plaintext highlighter-rouge">git checkout HEAD -- files</code> 回滚到复制最后一次提交。</li>
+</ul>
+
+<h3 id="约定">约定</h3>
+
+<p>后文中以下面的形式使用图片：</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405232755.png" alt="enter image description here" /></p>
+
+<p>绿色的5位字符表示提交的 ID，分别指向父节点。分支用橙色显示，分别指向特定的提交。当前分支由附在其上的 <code class="language-plaintext highlighter-rouge">HEAD</code> 标识。</p>
+
+<p>这张图片里显示最后 5 次提交，<code class="language-plaintext highlighter-rouge">ed489</code> 是最新提交。 <code class="language-plaintext highlighter-rouge">main</code> 分支指向此次提交，另一个 <code class="language-plaintext highlighter-rouge">stable</code> 分支指向祖父提交节点。</p>
+
+<h3 id="命令详解">命令详解</h3>
+
+<h4 id="diff">Diff</h4>
+
+<p>有许多种方法查看两次提交之间的变动，下面是其中一些例子。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405232844.png" alt="enter image description here" /></p>
+
+<h4 id="commit">Commit</h4>
+
+<p>提交时，Git 用 stage 缓存中的文件创建一个新的提交，并把此时的节点设为父节点。然后把当前分支指向新的提交节点。下图中，当前分支是 <code class="language-plaintext highlighter-rouge">main</code>。</p>
+
+<p>在运行命令之前，<code class="language-plaintext highlighter-rouge">main</code> 指向 <code class="language-plaintext highlighter-rouge">ed489</code>，提交后，<code class="language-plaintext highlighter-rouge">main</code> 指向新的节点<code class="language-plaintext highlighter-rouge">f0cec</code> 并以 <code class="language-plaintext highlighter-rouge">ed489</code> 作为父节点。
+<img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405233101.png" alt="image-20220405233101740" /></p>
+
+<p>即便当前分支是某次提交的祖父节点，Git 会同样操作。下图中，在 <code class="language-plaintext highlighter-rouge">main</code> 分支的祖父节点 <code class="language-plaintext highlighter-rouge">stable</code> 分支进行一次提交，生成了 <code class="language-plaintext highlighter-rouge">1800b</code>。</p>
+
+<p><strong>这样，<code class="language-plaintext highlighter-rouge">stable </code>分支就不再是 <code class="language-plaintext highlighter-rouge">main</code> 分支的祖父节点。此时，<a href="#merge">merge</a> (合并) 或者 <a href="#rebase">rebase</a> （衍合）是必须的。</strong>
+<img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405233606.png" alt="image-20220405233606063" /></p>
+
+<p>如果想更改一次提交，使用 <code class="language-plaintext highlighter-rouge">git commit --amend</code>。Git 会使用与当前提交相同的父节点进行一次新提交，旧的提交会被取消。
+<img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405233736.png" alt="image-20220405233736337" /></p>
+
+<p>另一个例子是<a href="#detached">分离HEAD提交</a>，在后面的章节中介绍。</p>
+
+<h4 id="checkout">Checkout</h4>
+
+<p><strong><code class="language-plaintext highlighter-rouge">git checkout</code> 命令用于从历史提交（或者 stage 缓存）中拷贝文件到工作目录，也可用于切换分支。</strong></p>
+
+<p>当给定某个文件名（或者打开 <code class="language-plaintext highlighter-rouge">-p</code> 选项，或者文件名和-p选项同时打开）时，Git 会从指定的提交中拷贝文件到 stage 缓存和工作目录。比如，<code class="language-plaintext highlighter-rouge">git checkout HEAD~ foo.c</code> 会将提交节点 <code class="language-plaintext highlighter-rouge">HEAD~</code>（即当前提交节点的父节点）中的 <code class="language-plaintext highlighter-rouge">foo.c</code> 复制到工作目录并且加到 stage 缓存中。如果命令中没有指定提交节点，则会从 stage 缓存中拷贝内容。注意当前分支不会发生变化。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234039.png" alt="enter image description here" /></p>
+
+<p>当不指定文件名，而是给出一个（本地）分支时，那么 <code class="language-plaintext highlighter-rouge">_HEAD_</code> 标识会移动到那个分支（也就是说，我们「切换」到那个分支了），然后 stage 缓存和工作目录中的内容会和 <code class="language-plaintext highlighter-rouge">HEAD</code> 对应的提交节点一致。新提交节点（下图中的 <code class="language-plaintext highlighter-rouge">a47c3</code>）中的所有文件都会被复制（到 stage 缓存和工作目录中）；只存在于老的提交节点（<code class="language-plaintext highlighter-rouge">ed489</code>）中的文件会被删除；不属于上述两者的文件会被忽略，不受影响。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234211.png" alt="enter image description here" />
+如果既没有指定文件名，也没有指定分支名，而是一个标签、远程分支、SHA-1 值或者是像 <code class="language-plaintext highlighter-rouge">main~3</code> 类似的东西，就得到一个匿名分支，称作 <code class="language-plaintext highlighter-rouge">detached HEAD</code>（被分离的 <code class="language-plaintext highlighter-rouge">HEAD</code> 标识）。这样可以很方便地在历史版本之间互相切换。比如说你想要编译 1.6.6.1 版本的 Git，你可以运行 <code class="language-plaintext highlighter-rouge">git checkout v1.6.6.1</code>（这是一个标签，而非分支名），编译，安装，然后切换回另一个分支，比如说 <code class="language-plaintext highlighter-rouge">git checkout mian</code>。然而，当提交操作涉及到「分离的 HEAD」时，其行为会略有不同，详情见在<a href="#detached">下面</a>。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234314.png" alt="enter image description here" /></p>
+
+<h4 id="detached-head分离的head">detached HEAD(分离的HEAD)</h4>
+
+<blockquote>
+  <p>HEAD 标识处于分离状态时的提交操作</p>
+</blockquote>
+
+<p>当 <code class="language-plaintext highlighter-rouge">HEAD</code> 处于分离状态（不依附于任一分支）时，提交操作可以正常进行，但是不会更新任何已命名的分支。你可以认为这是在更新一个匿名分支。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234433.png" alt="enter image description here" /></p>
+
+<p>一旦此后你切换到别的分支，比如说 <code class="language-plaintext highlighter-rouge">_master_</code>，那么这个提交节点（可能）再也不会被引用到，然后就会被丢弃掉了。注意这个命令之后就不会有东西引用 <code class="language-plaintext highlighter-rouge">_2eecb_</code>。
+<img src="http://marklodato.github.io/visual-git-guide/checkout-after-detached.svg" alt="enter image description here" />
+但是，如果你想保存这个状态，可以用命令 <code class="language-plaintext highlighter-rouge">git checkout -b name</code> 来创建一个新的分支。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234454.png" alt="enter image description here" /></p>
+
+<h4 id="reset">Reset</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git reset</code> 命令把当前分支指向另一个位置，并且有选择的变动工作目录和索引。也用来在从历史commit历史中复制文件到索引，而不动工作目录。</p>
+
+<p>如果不给选项，那么当前分支指向到那个提交。如果用 <code class="language-plaintext highlighter-rouge">--hard</code> 选项，那么工作目录也更新，如果用 <code class="language-plaintext highlighter-rouge">--soft</code> 选项，那么都不变。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234612.png" alt="enter image description here" /></p>
+
+<p>如果没有给出提交点的版本号，那么默认用 <code class="language-plaintext highlighter-rouge">HEAD</code>。这样，分支指向不变，但是索引会回滚到最后一次提交，如果用 <code class="language-plaintext highlighter-rouge">--hard</code> 选项，工作目录也同样。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234701.png" alt="enter image description here" /></p>
+
+<p>如果给了文件名(或者 <code class="language-plaintext highlighter-rouge">-p</code> 选项), 那么工作效果和带文件名的<a href="#checkout">checkout</a>差不多，除了索引被更新。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220405234735.png" alt="enter image description here" /></p>
+
+<h4 id="merge">Merge</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git merge</code> 命令把不同分支合并起来。合并前，索引必须和当前提交相同。如果另一个分支是当前提交的祖父节点，那么合并命令将什么也不做。</p>
+
+<p>另一种情况是如果当前提交是另一个分支的祖父节点，就导致 <strong><code class="language-plaintext highlighter-rouge">fast-forward</code> 合并</strong>。指向只是简单的移动，并生成一个新的提交。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406001325.png" alt="image-20220406001325219" /></p>
+
+<p>否则就是一次真正的合并。<strong>默认把当前提交（<code class="language-plaintext highlighter-rouge">ed489</code> 如下所示）和另一个提交（<code class="language-plaintext highlighter-rouge">33104</code>）以及他们的共同祖父节点（<code class="language-plaintext highlighter-rouge">b325c</code>）进行一次<a href="http://en.wikipedia.org/wiki/Three-way_merge">三方合并</a></strong>。结果是先保存当前目录和索引，然后和父节点 <code class="language-plaintext highlighter-rouge">33104</code> 一起做一次新提交。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406002840.png" alt="image-20220406002840572" /></p>
+
+<h4 id="cherry-pick">Cherry-Pick</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git cherry-pick</code> 命令「复制」一个提交节点并在当前分支做一次完全一样的新提交。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406002857.png" alt="enter image description here" /></p>
+
+<h4 id="rebase">Rebase</h4>
+
+<p><code class="language-plaintext highlighter-rouge">git rebase</code> 是合并命令的另一种选择。合并把两个父分支合并进行一次提交，提交历史不是线性的。rebase 在当前分支上重演另一个分支的历史，提交历史是线性的。</p>
+
+<p>本质上，这是线性化的自动的 <a href="#cherry-pick">cherry-pick</a>。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406215755.png" alt="enter image description here" /></p>
+
+<p>上面的命令都在 <code class="language-plaintext highlighter-rouge">topic</code> 分支中进行，而不是 <code class="language-plaintext highlighter-rouge">main</code> 分支，在 <code class="language-plaintext highlighter-rouge">main</code> 分支上重演，并且把分支指向新的节点。注意旧提交没有被引用，将被回收。</p>
+
+<p>要限制回滚范围，使用 <code class="language-plaintext highlighter-rouge">--onto</code> 选项。下面的命令在 <code class="language-plaintext highlighter-rouge">main</code> 分支上重演当前分支从 <code class="language-plaintext highlighter-rouge">169a6</code> 以来的最近几个提交，即 <code class="language-plaintext highlighter-rouge">2c33a</code>。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406215827.png" alt="enter image description here" /></p>
+
+<p>同样有 <code class="language-plaintext highlighter-rouge">git rebase --interactive</code> 让你更方便的完成一些复杂操作，比如丢弃、重排、修改、合并提交。</p>
+
+<h2 id="奇淫技巧">奇淫技巧</h2>
+
+<h3 id="checkout检出提交--检出文件">checkout检出提交 || 检出文件</h3>
+
+<p><code class="language-plaintext highlighter-rouge">git checkout</code> 这个命令有三个不同的作用：<strong>检出文件</strong>、<strong>检出提交</strong>和<strong>检出分支</strong>。</p>
+
+<ul>
+  <li>检出提交和检出分支会使工作目录和这个提交/分支完全匹配。你可以用它来查看项目之前的状态，而不改变当前的状态。</li>
+  <li>检出文件使你能够查看某个特定文件的旧版本，而工作目录中剩下的文件不变。</li>
+</ul>
+
+<p>一旦你回到 master 分支之后，你可以使用 <code class="language-plaintext highlighter-rouge">git revert</code> 或 <code class="language-plaintext highlighter-rouge">git reset</code> 来回滚任何不想要的更改。</p>
+
+<h4 id="检出文件">检出文件</h4>
+
+<p>如果你只对某个文件感兴趣，你也可以用 <code class="language-plaintext highlighter-rouge">git checkout</code> 来获取它的一个旧版本。比如说，如果你只想从之前的提交中查看 <code class="language-plaintext highlighter-rouge">hello.py</code> 文件，你可以使用下面的命令：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout a1e8fb5 hello.py
+</code></pre></div></div>
+
+<p>记住，和检出提交不同，这里 <em>确实</em> 会影响你项目的当前状态。旧的文件版本会显示为「需要提交的更改」，允许你回滚到文件之前的版本。如果你不想保留旧的版本，你可以用下面的命令检出到最近的版本：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout HEAD hello.py
+</code></pre></div></div>
+
+<blockquote>
+  <ul>
+    <li>版本控制系统背后的思想就是「安全」地储存项目的拷贝，这样你永远不用担心什么时候不可复原地破坏了你的代码库。当你建立了项目历史之后，<code class="language-plaintext highlighter-rouge">git checkout</code> 是一种便捷的方式，来将保存的快照「加载」到你的开发机器上去。</li>
+    <li>在另一方面，检出旧文件不影响你仓库的当前状态。你可以在新的快照中像其他文件一样重新提交旧版本。所以，在效果上，<code class="language-plaintext highlighter-rouge">git checkout</code> 的这个用法可以用来将单个文件回滚到旧版本 。</li>
+  </ul>
+</blockquote>
+
+<h4 id="检出分支">检出分支</h4>
+
+<blockquote>
+  <p>最佳实践：每次切换分支前  当前分支一定得是干净的（已提交状态）</p>
+
+  <p>坑：在切换分支时， 如果当前分支上有未暂存的修改（第一次）或者有未提交的暂存（第一次）</p>
+
+  <p>​      分支可以切换成功  但这种操作可能会污染其它分支的三个地方</p>
+
+  <p>HEAD</p>
+
+  <p>暂存区</p>
+
+  <p>工作目录</p>
+</blockquote>
+
+<p>远程分支有一个特别的属性，在你<strong>检出</strong>时自动进入分离 HEAD 状态。Git 这么做是出于不能直接在这些分支上进行操作的原因, 你必须在别的地方完成你的工作, （更新了远程分支之后）再用远程分享你的工作成果。</p>
+
+<p>如果检出远程分支会怎么样呢？</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout o/main<span class="p">;</span> git commit
+</code></pre></div></div>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220404165339.png" alt="image-20220404165332516" /></p>
+
+<p><strong>正如你所见，Git 变成了分离 HEAD 状态，当添加新的提交时 <code class="language-plaintext highlighter-rouge">o/main</code> 也不会更新。这是因为 <code class="language-plaintext highlighter-rouge">o/main</code> 只有在远程仓库中相应的分支更新了以后才会更新。</strong></p>
+
+<h3 id="git-status">git status</h3>
+
+<p><code class="language-plaintext highlighter-rouge">git status</code> 命令显示工作目录和缓存区的状态。你可以看到哪些更改被缓存了，哪些还没有，以及哪些还未被 Git 追踪。status 的输出 <em>不会</em> 告诉你任何已提交到项目历史的信息。如果你想看的话，应该使用 <code class="language-plaintext highlighter-rouge">git log</code> 命令。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git status
+</code></pre></div></div>
+
+<p>列出已缓存、未缓存、未追踪的文件。</p>
+
+<h3 id="git-add-之后想撤销">git add 之后想撤销</h3>
+
+<ul>
+  <li>
+    <p>git restore –staged &lt;文件/.&gt; 是将暂存区的文件从暂存区撤出，但不会更改文件的内容。</p>
+
+    <blockquote>
+      <p>git restore 指令使得在工作空间但是不在暂存区的文件撤销更改(内容恢复到没修改之前的状态)</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>git reset HEAD  (默认是 –mixed  )从暂存区的文件从暂存区撤出，但不会更改文件的内容，查看状态会提示未暂存（stated）</p>
+
+    <blockquote>
+      <p>git reset <文件> 直接添加文件名撤销</文件></p>
+    </blockquote>
+  </li>
+  <li>
+    <p>git reset –hard HEAD 从暂存区和工作目录中回滚，本地文件的修改也会回复到没修改之前的状态</p>
+  </li>
+</ul>
+
+<h3 id="分支合并mergerebase">分支合并（merge/rebase）</h3>
+
+<h4 id="rebase-1">rebase</h4>
+
+<ul>
+  <li>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase &lt;branch1&gt;
+</code></pre></div>    </div>
+
+    <p>将当前分支 rebase 到 <code class="language-plaintext highlighter-rouge">branch1</code> 后面，<strong>但是，rebase 为原分支上每一个提交创建一个新的提交，重写了项目历史</strong></p>
+  </li>
+  <li>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase &lt;branch1&gt; &lt;branch2&gt;
+</code></pre></div>    </div>
+
+    <p>将分支2的提交衔接在分支1的后面，这会使所有分支变成线性的，并且衔接之后，对应分支指向原先对应的提交</p>
+  </li>
+</ul>
+
+<p>如果你还没有完全熟悉 <code class="language-plaintext highlighter-rouge">git rebase</code>，你还可以在一个临时分支中执行 rebase。这样的话，如果你意外地弄乱了你 feature 分支的历史，你还可以查看原来的分支然后重试。</p>
+
+<p>比如说：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout feature
+git checkout -b temporary-branch
+git rebase -i master
+# [清理目录]
+git checkout master
+git merge temporary-branch
+</code></pre></div></div>
+
+<h4 id="merge-1">merge</h4>
+
+<ul>
+  <li>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git merge &lt;branch1&gt;
+</code></pre></div>    </div>
+
+    <p>将当前分支与分支1合并，并（HEAD，当前分支）指向新生成的提交</p>
+  </li>
+</ul>
+
+<h3 id="交互式rebese-整理自己私有仓库的提交">交互式rebese (整理自己私有仓库的提交)</h3>
+
+<h4 id="合并多个提交">合并多个提交</h4>
+
+<blockquote>
+  <p><a href="https://www.jianshu.com/p/201a56ffe9a4">git rebase -i 合并多次提交</a></p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase <span class="nt">-i</span> &lt;commmitID&gt; <span class="c">#任意选择一个基，整理这个基之后的所有提交</span>
+</code></pre></div></div>
+
+<p>它会打开一个文本编辑器，显示所有将被移动的提交：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pick 33d5b7a Message <span class="k">for </span>commit <span class="c">#1</span>
+pick 9480b3d Message <span class="k">for </span>commit <span class="c">#2</span>
+pick 5c67e61 Message <span class="k">for </span>commit <span class="c">#3</span>
+</code></pre></div></div>
+
+<p>这个列表定义了 rebase 将被执行后分支会是什么样的。更改 <code class="language-plaintext highlighter-rouge">pick</code> 命令或者重新排序，这个分支的历史就能如你所愿了。比如说，如果你想合并多个提交</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pick 33d5b7a Message <span class="k">for </span>commit <span class="c">#1</span>
+s 9480b3d Message <span class="k">for </span>commit <span class="c">#2</span>
+s 5c67e61 Message <span class="k">for </span>commit <span class="c">#3</span>
+
+<span class="c">#这里有几个使用说明（前面字母是缩写）：</span>
+<span class="c">#p，pick：使用该次提交</span>
+<span class="c">#r，reword：使用该次提交，但重新编辑提交信息</span>
+<span class="c">#e，edit：使用该次提交，但停止到该次提交</span>
+<span class="c">#s，squash：将该commit和前一个commit合并</span>
+<span class="c">#f，fixup：将该commit和前一个commit合并，但不保留该提交的注释信息</span>
+<span class="c">#x，exec：执行shell命令</span>
+<span class="c">#d，drop：丢弃该commit  </span>
+</code></pre></div></div>
+
+<p>保存后关闭文件，Git 会根据你的指令来执行 rebase</p>
+
+<blockquote>
+  <p>如果想要放弃当前 rebase 操作，用 <code class="language-plaintext highlighter-rouge">git rebase --abort</code></p>
+
+  <p>文件冲突后，使用 git rebase –continue继续</p>
+</blockquote>
+
+<h2 id="不要重设公共历史">不要重设公共历史</h2>
+
+<h3 id="不要使用-git-reset-修改公共历史">不要使用 git reset 修改公共历史</h3>
+
+<p>当有 <code class="language-plaintext highlighter-rouge">commit</code> 之后的提交被推送到公共仓库后，你绝不应该使用 <code class="language-plaintext highlighter-rouge">git reset</code>。发布一个提交之后，你必须假设其他开发者会依赖于它。</p>
+
+<p>移除一个其他团队成员在上面继续开发的提交在协作时会引发严重的问题。当他们试着和你的仓库同步时，他们会发现项目历史的一部分突然消失了。下面的序列展示了如果你尝试重设公共提交时会发生什么。<code class="language-plaintext highlighter-rouge">origin/master</code> 是你本地 <code class="language-plaintext highlighter-rouge">master</code> 分支对应的中央仓库中的分支。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406164944.png" alt="image-20220406164937522" /></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406165012.png" alt="image-20220406165012431" /></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406165030.png" alt="image-20220406165030573" /></p>
+
+<p><strong>一旦你在重设之后又增加了新的提交，Git 会认为你的本地历史已经和 <code class="language-plaintext highlighter-rouge">origin/master</code> 分叉了</strong>，同步你的仓库时的合并提交（<code class="language-plaintext highlighter-rouge">merge commit</code>）会使你的同事困惑。</p>
+
+<p>重点是，确保你只对本地的修改使用 <code class="language-plaintext highlighter-rouge">git reset</code>，而不是公共更改。如果你需要修复一个公共提交，<code class="language-plaintext highlighter-rouge">git revert</code> 命令正是被设计来做这个的。</p>
+
+<h3 id="谨慎使用-git-commit-amend">谨慎使用 git commit –amend</h3>
+
+<p>其实 <strong>git commit –amend</strong> 之所以 <code class="language-plaintext highlighter-rouge">push</code> 的时候失败我想就是上面的原因吧，需要强制 <code class="language-plaintext highlighter-rouge">push</code></p>
+
+<p>reset中提到永远不要重设和其他开发者共享的提交。对于修复也是一样(git commit –amend)：永远不要修复一个已经推送到公共仓库中的提交。</p>
+
+<p>修复过的提交事实上是全新的提交，之前的提交会被移除出项目历史。这和重设公共快照的后果是一样的。如果你修复了其他开发者在之后继续开发的一个提交，看上去他们的工作基础从项目历史中消失了一样。对于在这上面的开发者来说这是很困惑的，而且很难恢复。</p>
+
+<h3 id="不要-rebase-公共历史">不要 rebase 公共历史</h3>
+
+<p>例子：同时使用 git rebase 和 git merge 来保持线性的项目历史。这是一个确认你的合并都是快速向前的方法。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> new-feature master <span class="c"># 开始新的功能分支</span>
+<span class="c"># 编辑文件</span>
+git commit <span class="nt">-a</span> <span class="nt">-m</span> <span class="s2">"Start developing a feature"</span>
+</code></pre></div></div>
+
+<p>在 feature 分支开发了一半的时候，我们意识到项目中有一个安全漏洞:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout <span class="nt">-b</span> hotfix master   <span class="c"># 基于master分支创建一个快速修复分支</span>
+<span class="c"># 编辑文件</span>
+git commit <span class="nt">-a</span> <span class="nt">-m</span> <span class="s2">"Fix security hole"</span>
+<span class="c"># 合并回master</span>
+git checkout master
+git merge hotfix    <span class="c">#因为hotfix包含main的全部提交，因此这是一个快速合并，将main指向hotfix</span>
+git branch <span class="nt">-d</span> hotfix
+</code></pre></div></div>
+
+<p>将 hotfix 分支并回之后 master，我们有了一个分叉的项目历史。我们用 rebase 整合 feature 分支以获得线性的历史，而不是使用普通的 git merge。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout new-feature
+git rebase master   <span class="c">#一定是要将别的分支rebase到main分支上，而不是将main分支rebase到别的分支，公共提交是不要改变的</span>
+<span class="c">#有冲突解决冲突，new-feature分支上的提交会复制一份，衔接在main分支后面</span>
+</code></pre></div></div>
+
+<p>它将 new-feature 分支移到了 master 分支的末端，现在我们可以在 master 上进行标准的快速向前合并了:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout master
+git merge new-feature  <span class="c">#快速合并其它分支</span>
+</code></pre></div></div>
+
+<h3 id="远程分支">远程分支</h3>
+
+<p>远程分支和本地分支一样，只不过它们代表这些提交来自于其他人的仓库。你可以像查看本地分支一样查看远程分支，但你会处于分离 HEAD 状态（就像查看旧的提交时一样）。你可以把它们视作只读的分支。如果想要查看远程分支，只需要向 <code class="language-plaintext highlighter-rouge">git branch</code> 命令传入 <code class="language-plaintext highlighter-rouge">-r</code> 参数。远程分支拥有 remote 的前缀，所以你不会将它们和本地分支混起来。比如，下面的代码片段显示了从 origin 拉取之后，你可能想要查看的分支：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch -r
+# origin/master
+# origin/develop
+# origin/some-feature
+</code></pre></div></div>
+
+<p>同样，你可以用寻常的 <code class="language-plaintext highlighter-rouge">git checkout</code> 和 <code class="language-plaintext highlighter-rouge">git log</code> 命令来查看这些分支。如果你接受远程分支包含的更改，你可以使用 <code class="language-plaintext highlighter-rouge">git merge</code> 将它并入本地分支。</p>
+
+<h4 id="git-fetch">git fetch</h4>
+
+<p>当你希望查看其他人的工作进展时，你需要 fetch。<strong>fetch 下来的内容表示为一个远程分支</strong>，因此不会影响你的本地开发。这是一个安全的方式，在整合进你的本地仓库之前，检查那些提交。</p>
+
+<p>这个例子回顾了同步本地和远程仓库 <code class="language-plaintext highlighter-rouge">master</code> 分支的常见工作流：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git fetch origin
+</code></pre></div></div>
+
+<blockquote>
+  <p>git fetch <remote> <branch> 只会拉取指定的分支</branch></remote></p>
+</blockquote>
+
+<p>它会显示会被下载的分支：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a1e8fb5..45e66a4 master -&gt; origin/master
+a1e8fb5..9e8ab1c develop -&gt; origin/develop
+* [new branch] some-feature -&gt; origin/some-feature
+</code></pre></div></div>
+
+<p>在下图中，远程分支中的提交显示为方块，而不是圆圈。正如你所见，<code class="language-plaintext highlighter-rouge">git fetch</code> 让你看到了另一个仓库完整的分支结构。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/penghuima/ImageBed@master/img/blog_file/PicGo-Github-ImgBed20220406215740.png" alt="image-20220406215740307" /></p>
+
+<p>执行</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git merge origin/master
+</code></pre></div></div>
+
+<p>origin/master 和 master 分支现在指向了同一个提交，你已经和上游的更新保持了同步。</p>
+
+<h4 id="git-pull">git pull</h4>
+
+<p>在基于 Git 的协作工作流中，将上游更改合并到你的本地仓库是一个常见的工作。我们已经知道应该使用 <code class="language-plaintext highlighter-rouge">git fetch</code>，然后是 <code class="language-plaintext highlighter-rouge">git merge</code>，但是 <code class="language-plaintext highlighter-rouge">git pull</code> 将这两个命令合二为一。</p>
+
+<p>用法</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git pull &lt;remote&gt;
+</code></pre></div></div>
+
+<p>拉取当前分支对应的远程副本中的更改，并立即并入本地副本。效果和 <code class="language-plaintext highlighter-rouge">git fetch</code> 后接 <code class="language-plaintext highlighter-rouge">git merge origin/.</code> 一致。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git pull --rebase &lt;remote&gt;
+</code></pre></div></div>
+
+<p>和上一个命令相同，但使用 <code class="language-plaintext highlighter-rouge">git rebase</code> 合并远程分支和本地分支，而不是使用 <code class="language-plaintext highlighter-rouge">git merge</code>。</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">--rebase</code> 标记可以用来保证线性的项目历史，防止合并提交（merge commits）的产生。很多开发者倾向于使用 rebase 而不是 merge，因为「我想要把我的更改放在其他人完成的工作之后」</p>
+
+  <p>事实上，使用 <code class="language-plaintext highlighter-rouge">--rebase</code> 的 pull 的工作流是如此普遍</p>
+
+  <p>你可以直接在配置项中设置它：（我还没有设置）</p>
+
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global branch.autosetuprebase always # In git &lt; 1.7.9
+git config --global pull.rebase true              # In git &gt;= 1.7.9
+</code></pre></div>  </div>
+
+  <p>在运行这个命令之后，所有的 <code class="language-plaintext highlighter-rouge">git pull</code> 命令将使用 <code class="language-plaintext highlighter-rouge">git rebase</code> 而不是 <code class="language-plaintext highlighter-rouge">git merge</code></p>
+</blockquote>
+
+<h4 id="git-push">git push</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push &lt;remote&gt; &lt;branch&gt;
+</code></pre></div></div>
+
+<p>将指定的分支推送到 <code class="language-plaintext highlighter-rouge">&lt;remote&gt;</code> 上，包括所有需要的提交和提交对象。它会在目标仓库中创建一个本地分支。<strong>为了防止你覆盖已有的提交，如果会导致目标仓库非快速向前合并时，Git 不允许你 push</strong>。</p>
+
+<p>==当你运行 <code class="language-plaintext highlighter-rouge">git push origin master</code> 发布更改时发生的事情。注意，<code class="language-plaintext highlighter-rouge">git push</code> 和在远程仓库内部运行 <code class="language-plaintext highlighter-rouge">git merge master</code> 事实上是一样的。(在远程仓库内，remote/master 合并 master)==</p>
+
+<blockquote>
+  <p><strong>强制推送</strong></p>
+
+  <p>Git 为了防止你覆盖中央仓库的历史，会拒绝你会导致非快速向前合并的推送请求。所以，如果远程历史和你本地历史已经分叉，你需要将远程分支 pull 下来，在本地合并后再尝试推送。</p>
+
+  <p><code class="language-plaintext highlighter-rouge">--force</code> 这个标记覆盖了这个行为，让远程仓库的分支符合你的本地分支，删除你上次 pull 之后可能的上游更改。只有当你意识到你刚刚共享的提交不正确，<strong>并用 <code class="language-plaintext highlighter-rouge">git commit --amend</code> 或者交互式 rebase 修复之后，你才需要用到强制推送</strong>。但是，你必须绝对确定在你使用 <code class="language-plaintext highlighter-rouge">--force</code> 标记前你的同事们都没有 pull 这些提交。</p>
+</blockquote>
+
+<p>下面的例子描述了将本地提交推送到中央仓库的一些标准做法。首先，确保你本地的 <code class="language-plaintext highlighter-rouge">master</code> 和中央仓库的副本是一致的，提前 fetch 中央仓库的副本并在上面 rebase。交互式 rebase 同样是共享之前清理提交的好机会。接下来，<code class="language-plaintext highlighter-rouge">git push</code> 命令将你本地 <code class="language-plaintext highlighter-rouge">master</code> 分支上的所有提交发送给中央仓库.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout master
+git fetch origin master
+git rebase <span class="nt">-i</span> origin/master    <span class="c">#上面这两步可以合为一个 git pull --rebase origin/master</span>
+<span class="c"># Squash commits, fix up commit messages etc.</span>
+git push origin master
+</code></pre></div></div>
+
+<p>因为我们已经确信本地的 <code class="language-plaintext highlighter-rouge">master</code> 分支是最新的，它应该导致快速向前的合并，<code class="language-plaintext highlighter-rouge">git push</code> 不应该抛出非快速向前之类的问题。</p>
+
+<h3 id="pull-request">pull request</h3>
+
+<p>Pull Request 是开发者使用 GitHub 进行协作的利器。这个功能为用户提供了友好的页面，让提议的更改在并入官方项目之前，可以得到充分的讨论。</p>
+
+<p>有如下三种工作流 ：基于功能分支的工作流、gitflow工作流、fork工作流，这里重点讲一下fork工作流</p>
+
+<h4 id="fork工作流">fork工作流</h4>
+
+<p>首先fork完项目之后，创建本地仓库</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git clone git@penghuima: one的用户名/repo.git
+</code></pre></div></div>
+
+<p><strong>Fork 工作流需要两个远程连接</strong></p>
+
+<ul>
+  <li><strong>一个是中央仓库</strong></li>
+  <li><strong>另一个是开发者个人的服务端仓库。</strong></li>
+</ul>
+
+<p><strong>你可以给这些远端取任何名字，约定的做法是将 <code class="language-plaintext highlighter-rouge">origin</code> 作为你 fork 后的仓库的远端（运行 <code class="language-plaintext highlighter-rouge">git clone</code> 是会自动创建）和 <code class="language-plaintext highlighter-rouge">upstream</code> 作为官方项目。</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote add upstream https://github.com/maintainer/repo
+</code></pre></div></div>
+
+<p>你需要使用上面的命令来创建上游仓库的远程连接。它使得你轻易地保持本地仓库和官方仓库的进展同步。</p>
+
+<p><strong>开发者和中央仓库保持同步</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git pull upstream master &lt;分支&gt; <span class="nt">--rebase</span>  <span class="c">#待验证命令正确与否   都不是同一个分支啊</span>
+</code></pre></div></div>
+
+<h2 id="查看分支图">查看分支图</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git log <span class="nt">--oneline</span> <span class="nt">--graph</span> <span class="nt">--all</span>  <span class="nt">--decorate</span>  <span class="c">#貌似只需要前三个参数就好了</span>
+<span class="c">#或者使用这个 gitk 图形界面命令来输出所有分支信息</span>
+gitk <span class="nt">--all</span>
+</code></pre></div></div>
+
+<h2 id="从理论到实践">从理论到实践</h2>
+
+<p>把 <a href="https://github.com/pcottle/learnGitBranching">learnGitBranching</a> 的题刷一遍就可以了，这是一个很棒的网站</p>
+
+<p><strong>相关引用</strong></p>
+
+<blockquote>
+  <p><a href="https://www.atlassian.com/git/tutorials">tutorials</a></p>
+
+  <p><a href="https://github.com/geeeeeeeeek/git-recipes">git-recipes</a></p>
+
+  <p><a href="https://github.com/521xueweihan/git-tips">git-tips</a></p>
+
+  <p><em><a href="https://rogerdudler.github.io/git-guide/index.zh.html">Git 小白教程</a></em></p>
+
+  <p><a href="https://github.com/pcottle/learnGitBranching">learnGitBranching</a></p>
+
+  <p><a href="https://blog.csdn.net/qq_34519487/article/details/107882290">learnGitBranching答案</a></p>
+
+  <p><a href="https://blog.csdn.net/qq_33254766/article/details/122941664">一台电脑上的git同时使用两个github账户</a></p>
+
+  <p><a href="https://blog.51cto.com/u_4160094/2912836">Git配置多个github账号</a></p>
+
+  <p><a href="https://www.jianshu.com/p/201a56ffe9a4">git rebase -i 合并多次提交</a></p>
+</blockquote>
+
+:ET

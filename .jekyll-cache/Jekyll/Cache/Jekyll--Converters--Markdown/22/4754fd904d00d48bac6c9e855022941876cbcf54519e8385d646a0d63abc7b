@@ -1,0 +1,39 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#git-配置多个github账户" id="markdown-toc-git-配置多个github账户">Git 配置多个github账户</a></li>
+</ul>
+
+<h2 id="git-配置多个github账户">Git 配置多个github账户</h2>
+
+<ul>
+  <li>
+    <p>首先我们需要在<code class="language-plaintext highlighter-rouge">C:\Users\用户名\.ssh</code>（windows用户）下，生成两对 <code class="language-plaintext highlighter-rouge">ssh key</code> (公钥、私钥)</p>
+  </li>
+  <li>
+    <p>然后在 <code class="language-plaintext highlighter-rouge">ssh</code> 目录下创建 <code class="language-plaintext highlighter-rouge">config</code> 文件并配置内容如下</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># user one</span>
+Host penghuima   <span class="c">#Host myhost（这里是自定义的host简称，以后连接远程服务器就可以用命令ssh myhost）</span>
+HostName github.com  <span class="c">#HostName 主机名可用ip也可以是域名(如:github.com或者bitbucket.org)</span>
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa
+  
+<span class="c"># user two </span>
+Host nudtpcm
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa_two
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>在GitHub 账户中部署添加 <code class="language-plaintext highlighter-rouge">ssh</code> 公钥</p>
+  </li>
+  <li>
+    <p>远程测试</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-T</span> git@penghuima  <span class="c">#在config文件里配置host的命名</span>
+ssh <span class="nt">-T</span> git@nudtpcm
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+:ET
